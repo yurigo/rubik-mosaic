@@ -6,7 +6,27 @@ Editor web para convertir imágenes en mosaicos de seis colores, organizados en 
 
 ## Estado
 
-Especificación inicial. La aplicación todavía no está implementada y no existen comandos de instalación, desarrollo o pruebas.
+Primera iteración del editor: carga local de JPG/PNG/WebP, inventario y disposición de cubos, recorte con ampliación y posición, conversión a seis colores, dithering configurable y comparación de imágenes. Incluye un paisaje de ejemplo para probar sin subir archivos.
+
+El patrón todavía no valida el montaje físico. Brillo/contraste, zoom de inspección, guía por cubos y exportaciones quedan pendientes.
+
+## Desarrollo y comprobaciones
+
+Requiere Node.js 24 y npm. Las dependencias están fijadas en `package-lock.json`.
+
+```sh
+npm ci
+npm run dev
+```
+
+| Comando | Función |
+|---|---|
+| `npm test` | Pruebas del motor: geometría, recorte, reducción, paleta y dithering |
+| `npm run typecheck` | Comprobación de tipos de TypeScript y componentes Vue |
+| `npm run build` | Comprueba tipos y genera `dist/` |
+| `npm run preview` | Sirve el resultado de la compilación |
+
+GitHub Actions ejecuta pruebas y build en las PR y al actualizar `master`.
 
 ## Tecnología
 
@@ -19,6 +39,12 @@ Vue 3, TypeScript y Vite. Componentes `.vue` con templates y procesamiento de im
 - [Diseño de la interfaz](docs/design.md).
 - [Instrucciones para agentes](AGENTS.md).
 
-## Próximo incremento
+## Despliegue en Vercel
 
-Configurar la base técnica y comprobar la geometría del mosaico; después implementar carga de imagen, conversión a seis colores y comparación con/sin dithering. La guía de montaje y las exportaciones se incorporarán en entregas posteriores.
+Importar este repositorio en un proyecto de Vercel con la integración de GitHub. Configuración: framework **Vite**, directorio raíz **`.`**, instalación **`npm ci`**, build **`npm run build`**, salida **`dist`** y Node.js **24.x**. No requiere variables de entorno.
+
+Mantener **`master`** como rama de producción. La integración genera previews de las ramas/PR y publica producción cuando se actualiza `master`. Vercel construye y despliega; GitHub Actions ejecuta las pruebas del proyecto por separado.
+
+Para probar una rama que ya existía al conectar Vercel, usar **Deployments → Create Deployment** e indicar su nombre. Si `master` aún contiene solo documentación, su primer despliegue no podrá compilar la aplicación hasta integrar la primera PR de código; la rama de la PR sí contiene la aplicación.
+
+Documentación del proveedor: [GitHub y previews](https://vercel.com/docs/git/vercel-for-github), [despliegue por referencia Git](https://vercel.com/docs/git).

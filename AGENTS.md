@@ -13,4 +13,4 @@
 
 ## Comandos
 
-Todavía no hay aplicación ni comandos de build, lint o test. La PR de inicialización debe definirlos en el README y actualizar esta sección.
+Node.js 24 y npm. `npm ci` instala; `npm run dev` inicia; `npm test` verifica el motor; `npm run typecheck` comprueba tipos; `npm run build` comprueba tipos y compila a `dist/`. Antes de cerrar cambios en el motor o la interfaz, ejecuta las pruebas y el build. No hay un linter configurado todavía.
