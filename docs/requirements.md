@@ -72,6 +72,6 @@ Fuera del MVP: cuentas, pagos, colaboración, servidor de procesamiento, generac
 ## Pendiente de cerrar antes de cada implementación
 
 - Confirmar supuesto de cubos girables 3×3 y separar claramente las entregas visual y físicamente validada.
-- Fijar los rangos y fórmulas de brillo/contraste y la política de saturación del error del dithering.
+- Fijar los rangos y fórmulas de brillo/contraste. La política del dithering implementado está en arquitectura.
 - Contrastar paleta y legibilidad con imágenes de prueba; medir límites y rendimiento.
 - Formalizar el esquema JSON v1 antes de implementar importación/exportación.

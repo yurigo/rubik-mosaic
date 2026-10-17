@@ -10,7 +10,7 @@ El producto es un editor con estado compartido: imagen, recorte, inventario, dim
 |---|---|
 | Interfaz | Vue 3, componentes `.vue`, `<template>` y Composition API con `<script setup lang="ts">` |
 | Lenguaje | TypeScript con modo estricto e inferencia; tipos explícitos en los contratos que lo necesiten |
-| Construcción | Vite; fijar versiones y gestor de paquetes al inicializar el proyecto |
+| Construcción | Vite y npm, versiones fijadas mediante package-lock.json; Node.js 24 |
 | Imagen | Canvas para entrada/salida; algoritmos independientes de Vue y del DOM |
 | Estilos | CSS; añadir una biblioteca solo si resuelve una necesidad demostrada |
 | Ejecución | Aplicación cliente desplegable como archivos estáticos; sin backend ni SSR en el MVP |
@@ -52,7 +52,7 @@ Paleta sRGB inicial, pendiente de contrastar con cubos reales:
 | W | Blanco | #FFFFFF |
 | O | Naranja | #FF5800 |
 
-Para el primer motor, convertir sRGB a RGB lineal y usar distancia euclídea y difusión de error en ese espacio. Floyd–Steinberg recorre de izquierda a derecha y de arriba abajo: 7/16 a la derecha, 3/16 abajo izquierda, 5/16 abajo y 1/16 abajo derecha. Descartar el error exterior sin redistribuir; multiplicarlo por la intensidad seleccionada. Desempatar por orden R,G,Y,B,W,O. Antes de implementarlo, fijar las fórmulas de ajuste y la política de saturación. Comparar resultados visuales antes de introducir una métrica perceptual distinta.
+El primer motor compone transparencia sobre blanco en sRGB y convierte los canales a RGB lineal. La reducción promedia por área con pesos de solapamiento; la cuantización usa distancia euclídea y difusión de error en RGB lineal. Floyd–Steinberg recorre de izquierda a derecha y de arriba abajo: 7/16 a la derecha, 3/16 abajo izquierda, 5/16 abajo y 1/16 abajo derecha. Descarta el error exterior sin redistribuir y lo multiplica por la intensidad seleccionada. Desempata por orden R,G,Y,B,W,O. El error se acumula sin saturar y cada muestra se limita a [0,1] al cuantizarla. Comparar resultados visuales antes de introducir una métrica perceptual distinta. Brillo/contraste no se implementan en esta iteración.
 
 ## Contrato de proyecto propuesto
 
