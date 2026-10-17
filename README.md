@@ -1,25 +1,24 @@
 # Rubik Mosaic
 
-Convierte una imagen en un patrón de seis colores para preparar un mosaico con caras de cubos Rubik 3×3.
+Editor web para convertir imágenes en mosaicos de seis colores, organizados en caras de cubos Rubik 3×3.
 
-**Estado:** especificación inicial; todavía no existe una aplicación ejecutable. La viabilidad física de los patrones debe verificarse antes de prometer montaje mediante giros.
+**Ejemplo:** nueve cubos colocados en 3×3 forman una imagen de 9×9 casillas (81 píxeles).
 
-Ejemplo: nueve cubos dispuestos en 3×3 producen una imagen de 9×9 casillas (81 píxeles). Cada cubo aporta nueve casillas visibles.
+## Estado
+
+Especificación inicial. La aplicación todavía no está implementada y no existen comandos de instalación, desarrollo o pruebas.
+
+## Tecnología
+
+Vue 3, TypeScript y Vite. Componentes `.vue` con templates y procesamiento de imagen en el navegador. El motor de conversión será independiente de Vue. Véanse las decisiones y límites en [arquitectura](docs/architecture.md).
 
 ## Documentación
 
-- [ERS v0.1](docs/ERS.md): requisitos confirmados, propuestas y criterios de aceptación.
-- [Reglas para agentes](AGENTS.md): acuerdos de trabajo del repositorio.
-- [Cómo colaborar y revisar PR](CONTRIBUTING.md).
-- [Skills, instrucciones y plugins](docs/AI-SETUP.md): diferencias y configuración.
-- [Dirección visual inicial](docs/UI.md): propuesta de experiencia y criterios de revisión.
+- [Requisitos y criterios de aceptación](docs/requirements.md).
+- [Arquitectura y plan de implementación](docs/architecture.md).
+- [Diseño de la interfaz](docs/design.md).
+- [Instrucciones para agentes](AGENTS.md).
 
-## Primera entrega prevista
+## Próximo incremento
 
-Configurar inventario y disposición de cubos, cargar una imagen y mostrar el patrón en la resolución correspondiente. El alcance completo del MVP visual está en el ERS; no todo se implementará en una sola PR.
-
-React, TypeScript y Vite son una propuesta pendiente de concretar. Los comandos de instalación, ejecución y pruebas se añadirán cuando exista la base técnica; por ahora no hay dependencias ni comandos de aplicación.
-
-## Flujo de trabajo
-
-Una tarea pequeña → una rama → implementación y comprobaciones → pull request → revisión del propietario → merge. La rama principal actual es `master`.
+Configurar la base técnica y comprobar la geometría del mosaico; después implementar carga de imagen, conversión a seis colores y comparación con/sin dithering. La guía de montaje y las exportaciones se incorporarán en entregas posteriores.

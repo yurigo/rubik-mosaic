@@ -1,35 +1,16 @@
-# Acuerdos de trabajo
+# Instrucciones del proyecto
 
-## Contexto
+- Consulta [requisitos](docs/requirements.md) y [arquitectura](docs/architecture.md) para la tarea; consulta [diseño](docs/design.md) cuando cambies la interfaz. Conserva los IDs de los requisitos.
+- Usa Vue 3, TypeScript y Vite. Escribe componentes `.vue` con `<template>` y `<script setup lang="ts">`. No introduzcas React ni JSX/TSX.
+- Prioriza código legible, inferencia de tipos y contratos pequeños. Evita anotaciones redundantes, abstracciones y dependencias sin una necesidad concreta.
+- Mantén el motor de imagen independiente de Vue y del DOM. El MVP procesa las imágenes en el navegador.
+- Respeta la geometría y la paleta del ERS. No presentes un patrón visual como físicamente validado sin comprobarlo.
+- Trabaja en ramas y PR pequeñas. Antes de retomar una PR, consulta su estado y los comentarios publicados; no sobrescribas cambios ajenos. El propietario integra salvo que pida expresamente hacer merge.
+- Verifica los comportamientos afectados y comunica qué se comprobó y qué quedó pendiente. En cambios visuales, inspecciona también el resultado en pantalla.
+- Mantén la documentación centrada en producto, implementación y mantenimiento. Actualiza la decisión afectada sin copiar conversaciones, tutoriales generales ni preferencias ajenas al proyecto.
+- No publiques secretos ni imágenes personales. No añadas herramientas externas que la tarea no necesite.
+- Comunica cambios y decisiones en español.
 
-Lee README.md y los requisitos relevantes de docs/ERS.md antes de modificar el proyecto. El ERS es un borrador: diferencia requisitos confirmados de propuestas. Para cambios de interfaz, consulta docs/UI.md. La comunicación con el propietario será en español y explicará brevemente las decisiones para facilitar el aprendizaje.
+## Comandos
 
-## Invariantes del producto
-
-- Cada cubo estándar 3×3 aporta un bloque visible de nueve casillas.
-- Con C columnas y F filas de cubos, la matriz mide 3C columnas por 3F filas; C×F no supera el inventario.
-- Las casillas solo usan rojo, verde, amarillo, azul, blanco y naranja. No impongas cuotas globales iguales de color.
-- El procesamiento de imagen del MVP se realiza en el navegador, sin enviar imágenes a servicios externos.
-- La misma entrada decodificada, parámetros y versión del motor deben producir el mismo patrón.
-- Un patrón visual no equivale a un montaje físico validado. No declares realizable una cara sin verificación.
-
-## Implementación y alcance
-
-- Trabaja en una rama y prepara cambios pequeños con referencia a los requisitos aplicables.
-- Separa el motor de conversión de la interfaz. Acuerda tipos y contratos antes de repartir tareas.
-- Usa primero las capacidades de la plataforma y las dependencias existentes. Justifica cualquier dependencia nueva.
-- Mantén los cambios dentro de la tarea. Documenta supuestos reversibles y consulta decisiones que cambien el alcance o la arquitectura.
-- No instales skills, plugins ni hooks ajenos al ticket. Al incorporar terceros, revisa fuente, licencia, versión y dependencias; registra lo incorporado en docs/AI-SETUP.md.
-- Si se autoriza trabajo paralelo, asigna entregables y archivos para evitar ediciones simultáneas. No añadas una orquestación compleja sin necesidad.
-
-## Verificación y revisión
-
-- Ejecuta las comprobaciones documentadas y apropiadas al cambio. No inventes comandos, resultados ni pruebas de una aplicación que todavía no existe.
-- Para el motor, verifica geometría, paleta, determinismo y exportación/importación cuando se implementen.
-- Para la interfaz, comprueba teclado, foco, estados de error, dimensiones móviles y fidelidad de la cuadrícula; documenta el navegador y las comprobaciones realmente ejecutadas.
-- En la PR explica el problema, el resultado, la validación y las limitaciones. El propietario revisa e integra las PR; no hagas merge salvo petición explícita.
-- No publiques credenciales, archivos .env ni imágenes personales de ejemplo en el repositorio.
-
-## Estado técnico actual
-
-Este repositorio contiene documentación, sin aplicación ni dependencias. Todavía no hay comandos de build, lint o test. Añádelos y actualiza esta sección en la PR que configure la base técnica.
+Todavía no hay aplicación ni comandos de build, lint o test. La PR de inicialización debe definirlos en el README y actualizar esta sección.
