@@ -52,7 +52,7 @@ Paleta sRGB inicial, pendiente de contrastar con cubos reales:
 | W | Blanco | #FFFFFF |
 | O | Naranja | #FF5800 |
 
-El primer motor compone transparencia sobre blanco en sRGB y convierte los canales a RGB lineal. La reducción promedia por área con pesos de solapamiento; la cuantización usa distancia euclídea y difusión de error en RGB lineal. Floyd–Steinberg recorre de izquierda a derecha y de arriba abajo: 7/16 a la derecha, 3/16 abajo izquierda, 5/16 abajo y 1/16 abajo derecha. Descarta el error exterior sin redistribuir y lo multiplica por la intensidad seleccionada. Desempata por orden R,G,Y,B,W,O. El error se acumula sin saturar y cada muestra se limita a [0,1] al cuantizarla. Comparar resultados visuales antes de introducir una métrica perceptual distinta. Brillo/contraste no se implementan en esta iteración.
+El primer motor compone transparencia sobre blanco en sRGB y convierte los canales a RGB lineal. La reducción promedia por área con pesos de solapamiento; la cuantización usa distancia euclídea y difusión de error en RGB lineal. Floyd–Steinberg recorre de izquierda a derecha y de arriba abajo: 7/16 a la derecha, 3/16 abajo izquierda, 5/16 abajo y 1/16 abajo derecha. Descarta el error exterior sin redistribuir y lo multiplica por la intensidad seleccionada. Desempata por orden R,G,Y,B,W,O. El error se acumula sin saturar y cada muestra se limita a [0,1] al cuantizarla. El selector de comparación descrito a continuación permite explorar otras métricas. Brillo/contraste no se implementan en esta iteración.
 
 ## Contrato de proyecto propuesto
 
@@ -74,3 +74,13 @@ Coordenadas de datos desde cero, origen arriba izquierda, lectura por filas; coo
 `src/core/lego.ts` mantiene IDs BrickLink con prefijo `BL-` y las combinaciones de pieza/color verificadas. La interfaz conserva disposición Rubik y LEGO por separado y selecciones independientes por pieza. La selección solo cambia la cuantización; el recorte y la reducción se reutilizan. Los acabados y la base redonda se dibujan únicamente en Canvas. Fuentes: [paletas LEGO](lego-palette.md).
 
 El contrato JSON anterior es una propuesta de Rubik aún sin implementar; habrá que ampliarlo con material, pieza y paleta antes de implementar RF-11 para ambos modos.
+
+## Métodos de comparación (RF-18)
+
+`src/core/color-distance.ts` define las opciones y conversiones. `quantize` recibe el método después de la paleta; por defecto `rgb`, rechazando valores desconocidos. Convierte la paleta una vez y cada muestra al visitar su casilla. La selección minimiza distancia euclídea al cuadrado y conserva el desempate por orden de paleta.
+
+- **RGB lineal:** coordenadas lineales originales, sin cambios en el algoritmo previo.
+- **OKLab:** conversión desde sRGB lineal con las matrices de Björn Ottosson actualizadas el 25 de enero de 2021; distancia euclídea en L,a,b. [Fórmulas y código de referencia de dominio público](https://bottosson.github.io/posts/oklab/#converting-from-linear-srgb-to-oklab).
+- **HSL experimental:** primero codificar RGB lineal como sRGB continuo y convertirlo a HSL según las [definiciones de CSS Color](https://www.w3.org/TR/css-color-4/#rgb-to-hsl). Para comparar se usan coordenadas `(C cos(2πH), C sin(2πH), L)`, donde H está en vueltas, S,L en [0,1] y `C=(1−|2L−1|)S`. Distancia euclídea al cuadrado con pesos iguales. Esta métrica propia evita la discontinuidad de 0/360° y anula la contribución del tono en grises, blanco y negro. No es una distancia perceptual estándar ni una garantía de conservación del tono.
+
+La reducción por área, saturación a [0,1] al visitar una muestra y difusión Floyd–Steinberg permanecen en RGB lineal en todos los métodos. No convertir ni difundir el error como HSL u OKLab. No se añaden filtros de temperatura, brillo o saturación en esta entrega. El método deberá incluirse en el futuro contrato de proyecto antes de implementar RF-11.

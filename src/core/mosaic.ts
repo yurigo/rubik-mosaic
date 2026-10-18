@@ -1,3 +1,6 @@
+import { COLOR_METHODS, comparisonCoordinates } from './color-distance.ts'
+import type { ColorMethod } from './color-distance.ts'
+
 export const PALETTE = [
   { id: 'R', name: 'Rojo', hex: '#C41E3A' },
   { id: 'G', name: 'Verde', hex: '#009E60' },
@@ -71,12 +74,14 @@ export function sampleImage(source: Raster, crop: Crop, width: number, height: n
   return output
 }
 
-export function quantize(samples: Float32Array, width: number, height: number, strength = 0, palette: readonly PaletteColor[] = PALETTE): Mosaic {
+export function quantize(samples: Float32Array, width: number, height: number, strength = 0, palette: readonly PaletteColor[] = PALETTE, method: ColorMethod = 'rgb'): Mosaic {
   if (![width, height].every((n) => Number.isInteger(n) && n > 0) || width * height > 22500 || samples.length !== width * height * 3 || !samples.every(Number.isFinite)) throw new Error('La matriz de color no es válida.')
   if (!Number.isFinite(strength) || strength < 0 || strength > 1) throw new Error('La intensidad debe estar entre 0 y 1.')
+  if (!COLOR_METHODS.some((item) => item.id === method)) throw new Error('El método de comparación de colores no es válido.')
   if (!palette.length) throw new Error('Selecciona al menos un color.')
   if (new Set(palette.map((color) => color.id)).size !== palette.length || palette.some((color) => !color.id || !/^#[0-9a-f]{6}$/i.test(color.hex))) throw new Error('La paleta no es válida.')
   const paletteRgb = palette.map(({ hex }) => [1, 3, 5].map((start) => linear[parseInt(hex.slice(start, start + 2), 16)]))
+  const paletteCoordinates = paletteRgb.map((rgb) => comparisonCoordinates(rgb, method))
   const work = new Float32Array(samples)
   const pixels: ColorId[] = []
   for (let y = 0; y < height; y++) {
@@ -84,10 +89,11 @@ export function quantize(samples: Float32Array, width: number, height: number, s
       const index = (y * width + x) * 3
       // Clip only when visiting a sample; errors remain unbounded until then.
       const rgb = [0, 1, 2].map((channel) => Math.max(0, Math.min(1, work[index + channel])))
+      const coordinates = comparisonCoordinates(rgb, method)
       let nearest = 0
       let distance = Infinity
-      paletteRgb.forEach((color, candidate) => {
-        const d = color.reduce((sum, v, channel) => sum + (v - rgb[channel]) ** 2, 0)
+      paletteCoordinates.forEach((color, candidate) => {
+        const d = color.reduce((sum, v, channel) => sum + (v - coordinates[channel]) ** 2, 0)
         if (d < distance) { distance = d; nearest = candidate }
       })
       pixels.push(palette[nearest].id)

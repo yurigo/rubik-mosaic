@@ -1,6 +1,6 @@
 # Especificación de requisitos
 
-Versión 0.3 · 18 de octubre de 2026 · Borrador de producto
+Versión 0.4 · 18 de octubre de 2026 · Borrador de producto
 
 ## Objetivo y alcance
 
@@ -63,6 +63,10 @@ La restricción de seis colores afecta a las casillas, no al texto, líneas y co
 RF-02, RF-04, RF-05 y los bloques 3×3 de RF-08 describen el modo Rubik. En LEGO se aplican RF-14 a RF-17; se comparten carga, recorte, reducción por área y dithering. Los colores disponibles no implican cantidades disponibles: en esta entrega no se limita el consumo por color. Brillo/contraste, guía y exportaciones siguen pendientes.
 
 Paletas, fuentes y límites de fidelidad: [paletas LEGO](lego-palette.md). El catálogo incluye colores históricos; no garantiza disponibilidad de compra. No se mezclan tipos de pieza en un mismo mosaico.
+
+## Comparación de colores
+
+**RF-18:** seleccionar RGB lineal, OKLab o HSL experimental en Rubik y LEGO. RGB lineal es el valor inicial y reproduce los resultados anteriores. Cambiar método regenera el resultado sin modificar imagen, recorte, disposición, paleta o intensidad. El método afecta únicamente a la distancia para escoger un color; reducción y difusión del error siguen en RGB lineal. Todos los métodos respetan la paleta seleccionada, también con dithering. La elección se conserva durante la sesión y no se persiste entre recargas. No se garantiza una interpretación semántica de objetos ni una mejora visual para toda imagen.
 
 ## Montaje físico y entregas
 

@@ -6,6 +6,8 @@ import { countColors, getCrop, getGeometry, getLegoGeometry, PALETTE, quantize, 
 import type { Raster } from './core/mosaic'
 import LegoPalette from './components/LegoPalette.vue'
 import { getLegoPalette, LEGO_PARTS } from './core/lego'
+import { COLOR_METHODS } from './core/color-distance'
+import type { ColorMethod } from './core/color-distance'
 import type { LegoPartId } from './core/lego'
 import { createExample, readImage } from './io/images'
 
@@ -27,6 +29,8 @@ const palette = computed(() => isLego.value ? legoPalette.value.filter((color) =
 const paletteError = computed(() => palette.value.length ? '' : 'Selecciona al menos un color para generar el mosaico.')
 const shape = computed(() => LEGO_PARTS.find((part) => part.id === material.value)?.shape ?? 'square')
 const baseColor = ref('#FFFFFF')
+const colorMethod = ref<ColorMethod>('rgb')
+const methodDescription = computed(() => COLOR_METHODS.find((method) => method.id === colorMethod.value)!.description)
 const dither = ref(true)
 const strength = ref(80)
 const grid = ref(true)
@@ -50,7 +54,7 @@ const samples = computed(() => {
 })
 const mosaic = computed(() => {
   const geometry = layout.value.geometry
-  return samples.value && geometry && !paletteError.value ? quantize(samples.value, geometry.width, geometry.height, dither.value ? strength.value / 100 : 0, palette.value) : undefined
+  return samples.value && geometry && !paletteError.value ? quantize(samples.value, geometry.width, geometry.height, dither.value ? strength.value / 100 : 0, palette.value, colorMethod.value) : undefined
 })
 
 const consumption = computed(() => mosaic.value ? countColors(mosaic.value) : {})
@@ -145,6 +149,8 @@ onMounted(useExample)
 
           <section class="control-section last-section">
             <h2><span class="step">04</span> Mezcla los colores</h2>
+            <label class="material-label">Método de comparación de colores<select v-model="colorMethod" aria-describedby="color-method-description"><option v-for="method in COLOR_METHODS" :key="method.id" :value="method.id">{{ method.name }}</option></select></label>
+            <p id="color-method-description" class="control-hint">{{ methodDescription }}</p>
             <div class="segmented" role="group" aria-label="Modo de conversión"><button type="button" :aria-pressed="!dither" :class="{ selected: !dither }" @click="dither = false">Colores planos</button><button type="button" :aria-pressed="dither" :class="{ selected: dither }" @click="dither = true">Dithering</button></div>
             <p class="control-hint">El dithering mezcla pequeñas casillas para sugerir más tonos.</p>
             <label class="range-label" for="strength" :class="{ muted: !dither }">Intensidad <output>{{ strength }} %</output><input id="strength" v-model.number="strength" type="range" min="0" max="100" :disabled="!dither" /></label>

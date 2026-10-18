@@ -29,3 +29,7 @@ Propuesta visual pendiente de validación mediante un prototipo.
 ## Modo LEGO
 
 Selector de material junto a la disposición. LEGO muestra dimensiones en piezas, paleta con buscador por nombre/ID BrickLink y acciones Todos/Ninguno. Selección con casillas etiquetadas y muestras; lista desplazable para evitar un panel de 54 filas. La comparación conserva su protagonismo y debajo aparece el consumo por color. La cuadrícula marca piezas individuales en LEGO y bloques 3×3 en Rubik. Las tiles redondas permiten cambiar la base y explican que no se incluye en el recuento.
+
+## Comparación de colores
+
+Select etiquetado «Método de comparación de colores» junto a los controles de conversión, independiente del dithering. Ofrece RGB lineal, OKLab y HSL · experimental, con una descripción asociada a la opción actual. Mantener el resto de ajustes al cambiarlo para poder comparar. RGB es la opción inicial.
