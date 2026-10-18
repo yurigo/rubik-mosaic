@@ -1,6 +1,6 @@
 # Especificación de requisitos
 
-Versión 0.4 · 18 de octubre de 2026 · Borrador de producto
+Versión 0.5 · 18 de octubre de 2026 · Borrador de producto
 
 ## Objetivo y alcance
 
@@ -92,3 +92,7 @@ Fuera del MVP: cuentas, pagos, colaboración, servidor de procesamiento, generac
 - Fijar los rangos y fórmulas de brillo/contraste. La política del dithering implementado está en arquitectura.
 - Contrastar paleta y legibilidad con imágenes de prueba; medir límites y rendimiento.
 - Formalizar el esquema JSON v1 antes de implementar importación/exportación.
+
+## Correcciones por zonas
+
+**RF-19:** seleccionar por toque/click o teclado una zona conectada de la imagen original recortada, ajustar tolerancia y asignarle un único color de la paleta disponible. Mostrar la máscara antes de aplicar y el número de casillas que cubre al menos a la mitad. Conservar hasta 12 reglas no destructivas durante la sesión; permitir verlas y eliminarlas. La última regla activa prevalece en solapes. Cambiar encuadre, resolución, método o dithering conserva las reglas; cargar una nueva imagen o el ejemplo las limpia. Un color ausente de la paleta actual deja su regla inactiva y advertida, sin eliminarla; vuelve a actuar si el color está disponible de nuevo. Las casillas forzadas respetan la paleta y no reciben ni propagan error de dithering. La selección analiza una versión de hasta 640 píxeles en su lado mayor; los detalles más pequeños pueden no representarse. No se garantiza recuperar un ojo u otro detalle que no cubra al menos la mitad de una casilla. Combinaciones de colores y edición manual de casillas quedan fuera de esta entrega.

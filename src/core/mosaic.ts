@@ -74,18 +74,21 @@ export function sampleImage(source: Raster, crop: Crop, width: number, height: n
   return output
 }
 
-export function quantize(samples: Float32Array, width: number, height: number, strength = 0, palette: readonly PaletteColor[] = PALETTE, method: ColorMethod = 'rgb'): Mosaic {
+export function quantize(samples: Float32Array, width: number, height: number, strength = 0, palette: readonly PaletteColor[] = PALETTE, method: ColorMethod = 'rgb', forcedColors?: readonly (ColorId | undefined)[]): Mosaic {
   if (![width, height].every((n) => Number.isInteger(n) && n > 0) || width * height > 22500 || samples.length !== width * height * 3 || !samples.every(Number.isFinite)) throw new Error('La matriz de color no es válida.')
   if (!Number.isFinite(strength) || strength < 0 || strength > 1) throw new Error('La intensidad debe estar entre 0 y 1.')
   if (!COLOR_METHODS.some((item) => item.id === method)) throw new Error('El método de comparación de colores no es válido.')
   if (!palette.length) throw new Error('Selecciona al menos un color.')
   if (new Set(palette.map((color) => color.id)).size !== palette.length || palette.some((color) => !color.id || !/^#[0-9a-f]{6}$/i.test(color.hex))) throw new Error('La paleta no es válida.')
+  if (forcedColors && (forcedColors.length !== width * height || forcedColors.some((id) => id !== undefined && !palette.some((color) => color.id === id)))) throw new Error('Las reglas de color no son válidas para la paleta actual.')
   const paletteRgb = palette.map(({ hex }) => [1, 3, 5].map((start) => linear[parseInt(hex.slice(start, start + 2), 16)]))
   const paletteCoordinates = paletteRgb.map((rgb) => comparisonCoordinates(rgb, method))
   const work = new Float32Array(samples)
   const pixels: ColorId[] = []
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
+      const forced = forcedColors?.[y * width + x]
+      if (forced !== undefined) { pixels.push(forced); continue }
       const index = (y * width + x) * 3
       // Clip only when visiting a sample; errors remain unbounded until then.
       const rgb = [0, 1, 2].map((channel) => Math.max(0, Math.min(1, work[index + channel])))
@@ -99,7 +102,7 @@ export function quantize(samples: Float32Array, width: number, height: number, s
       pixels.push(palette[nearest].id)
       if (strength === 0) continue
       for (const [nx, ny, weight] of [[x + 1, y, 7 / 16], [x - 1, y + 1, 3 / 16], [x, y + 1, 5 / 16], [x + 1, y + 1, 1 / 16]]) {
-        if (nx < 0 || nx >= width || ny >= height) continue
+        if (nx < 0 || nx >= width || ny >= height || forcedColors?.[ny * width + nx] !== undefined) continue
         for (let channel = 0; channel < 3; channel++) work[(ny * width + nx) * 3 + channel] += (rgb[channel] - paletteRgb[nearest][channel]) * weight * strength
       }
     }

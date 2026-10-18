@@ -33,3 +33,7 @@ Selector de material junto a la disposición. LEGO muestra dimensiones en piezas
 ## Comparación de colores
 
 Select etiquetado «Método de comparación de colores» junto a los controles de conversión, independiente del dithering. Ofrece RGB lineal, OKLab y HSL · experimental, con una descripción asociada a la opción actual. Mantener el resto de ajustes al cambiarlo para poder comparar. RGB es la opción inicial.
+
+## Correcciones por zonas
+
+Panel «Dirige los colores» sobre la comparación. El botón «Seleccionar una zona» activa la selección sobre la imagen original; «Volver a encuadrar» sale del modo. Marca turquesa visible, tolerancia etiquetada, selector de color, recuento de casillas afectadas y Aplicar/Cancelar. Si una zona no cubre suficiente área, explicar que puede requerir más piezas o ampliar el encuadre, sin prometer recuperar detalles. Reglas enumeradas con Ver zona/Eliminar y aviso de color no disponible. Las acciones tienen objetivos táctiles de 44 px. En selección, la imagen es enfocable: las flechas mueven una cruz en pasos del 1 % y Intro/Espacio seleccionan. La selección no se aplica hasta confirmar la regla.
