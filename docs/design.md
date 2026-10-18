@@ -25,3 +25,7 @@ Propuesta visual pendiente de validación mediante un prototipo.
 3. Completar carga, ajuste y consulta de guía con teclado.
 4. Verificar que en móvil no se corten controles ni se deforme la imagen.
 5. Inspeccionar imágenes y errores representativos; registrar navegador, tamaño de pantalla y comprobaciones realizadas.
+
+## Modo LEGO
+
+Selector de material junto a la disposición. LEGO muestra dimensiones en piezas, paleta con buscador por nombre/ID BrickLink y acciones Todos/Ninguno. Selección con casillas etiquetadas y muestras; lista desplazable para evitar un panel de 54 filas. La comparación conserva su protagonismo y debajo aparece el consumo por color. La cuadrícula marca piezas individuales en LEGO y bloques 3×3 en Rubik. Las tiles redondas permiten cambiar la base y explican que no se incluye en el recuento.

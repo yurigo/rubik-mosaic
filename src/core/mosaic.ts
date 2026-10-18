@@ -7,7 +7,8 @@ export const PALETTE = [
   { id: 'O', name: 'Naranja', hex: '#FF5800' },
 ] as const
 
-export type ColorId = (typeof PALETTE)[number]['id']
+export type ColorId = string
+export type PaletteColor = { id: string; name: string; hex: string }
 export type Raster = { width: number; height: number; data: Uint8ClampedArray<ArrayBuffer> }
 export type Crop = { x: number; y: number; width: number; height: number }
 export type Geometry = { columns: number; rows: number; width: number; height: number; used: number; remaining: number }
@@ -17,7 +18,6 @@ const linear = Array.from({ length: 256 }, (_, value) => {
   const s = value / 255
   return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4
 })
-const paletteRgb = PALETTE.map(({ hex }) => [1, 3, 5].map((start) => linear[parseInt(hex.slice(start, start + 2), 16)]))
 
 export function getGeometry(available: number, columns: number, rows: number): Geometry {
   if (![available, columns, rows].every((n) => Number.isInteger(n) && n > 0)) {
@@ -71,9 +71,12 @@ export function sampleImage(source: Raster, crop: Crop, width: number, height: n
   return output
 }
 
-export function quantize(samples: Float32Array, width: number, height: number, strength = 0): Mosaic {
+export function quantize(samples: Float32Array, width: number, height: number, strength = 0, palette: readonly PaletteColor[] = PALETTE): Mosaic {
   if (![width, height].every((n) => Number.isInteger(n) && n > 0) || width * height > 22500 || samples.length !== width * height * 3 || !samples.every(Number.isFinite)) throw new Error('La matriz de color no es válida.')
   if (!Number.isFinite(strength) || strength < 0 || strength > 1) throw new Error('La intensidad debe estar entre 0 y 1.')
+  if (!palette.length) throw new Error('Selecciona al menos un color.')
+  if (new Set(palette.map((color) => color.id)).size !== palette.length || palette.some((color) => !color.id || !/^#[0-9a-f]{6}$/i.test(color.hex))) throw new Error('La paleta no es válida.')
+  const paletteRgb = palette.map(({ hex }) => [1, 3, 5].map((start) => linear[parseInt(hex.slice(start, start + 2), 16)]))
   const work = new Float32Array(samples)
   const pixels: ColorId[] = []
   for (let y = 0; y < height; y++) {
@@ -87,7 +90,7 @@ export function quantize(samples: Float32Array, width: number, height: number, s
         const d = color.reduce((sum, v, channel) => sum + (v - rgb[channel]) ** 2, 0)
         if (d < distance) { distance = d; nearest = candidate }
       })
-      pixels.push(PALETTE[nearest].id)
+      pixels.push(palette[nearest].id)
       if (strength === 0) continue
       for (const [nx, ny, weight] of [[x + 1, y, 7 / 16], [x - 1, y + 1, 3 / 16], [x, y + 1, 5 / 16], [x + 1, y + 1, 1 / 16]]) {
         if (nx < 0 || nx >= width || ny >= height) continue
@@ -96,4 +99,16 @@ export function quantize(samples: Float32Array, width: number, height: number, s
     }
   }
   return { width, height, pixels }
+}
+
+/** One LEGO 1×1 piece is one pixel, with the same total pixel budget as Rubik. */
+export function getLegoGeometry(columns: number, rows: number): Geometry {
+  if (![columns, rows].every((n) => Number.isInteger(n) && n > 0) || columns * rows > 22500) throw new Error('Introduce dimensiones enteras positivas, hasta 22.500 piezas en total.')
+  return { columns, rows, width: columns, height: rows, used: columns * rows, remaining: 0 }
+}
+
+export function countColors(mosaic: Mosaic) {
+  const counts: Record<string, number> = {}
+  for (const id of mosaic.pixels) counts[id] = (counts[id] ?? 0) + 1
+  return counts
 }

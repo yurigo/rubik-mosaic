@@ -1,10 +1,10 @@
 # Especificación de requisitos
 
-Versión 0.2 · 17 de octubre de 2026 · Borrador de producto
+Versión 0.3 · 18 de octubre de 2026 · Borrador de producto
 
 ## Objetivo y alcance
 
-Transformar una imagen en un mosaico de los seis colores del cubo Rubik, adaptado a la cantidad de cubos disponibles, y facilitar su reproducción física.
+Transformar una imagen en un mosaico de cubos Rubik o piezas LEGO 1×1, adaptado al material y a los colores seleccionados, y facilitar su reproducción física.
 
 **Confirmado:** carga de imagen, pixelado, dithering, paleta rojo/verde/amarillo/azul/blanco/naranja, inventario configurable y caso de nueve cubos en 3×3 que produce 9×9 píxeles.
 
@@ -50,6 +50,19 @@ Los criterios siguientes definen la propuesta verificable del MVP visual, salvo 
 | RF-13 | Validar montaje físico | Cada bloque aceptado dispone de un estado completo legal que demuestra su cara visible. Distingue no comprobado de no realizable. |
 
 La restricción de seis colores afecta a las casillas, no al texto, líneas y controles de la interfaz. A 9×9 se pierde mucho detalle: debe poder compararse con/sin dithering; no se garantiza que cualquier fotografía siga siendo reconocible.
+
+## Ampliación LEGO
+
+| ID | Requisito | Criterio de aceptación |
+|---|---|---|
+| RF-14 | Elegir Rubik, plate 3024, tile cuadrada 3070 o tile redonda 98138 | Cada pieza LEGO ofrece su propia paleta sólida catalogada, con nombre e ID BrickLink; Rubik conserva sus seis colores. |
+| RF-15 | Configurar ancho y alto LEGO en piezas | Una pieza = un píxel; 3×3 piezas producen 3×3 píxeles y consumen 9 piezas. Acepta rectángulos y enteros positivos hasta 22.500 piezas totales; no exige múltiplos de tres. |
+| RF-16 | Seleccionar colores de la caja | Cuantización y dithering solo usan colores seleccionados para la pieza actual. Un color genera un mosaico monocromo; ninguno muestra un mensaje y no muestra un resultado antiguo. Conserva la selección de cada pieza durante la sesión. |
+| RF-17 | Previsualizar y contar piezas LEGO | Representa plates con relieve ilustrativo, tiles cuadradas planas y redondas con base configurable. El recuento por color suma ancho×alto; la base no consume piezas ni interviene en la conversión. |
+
+RF-02, RF-04, RF-05 y los bloques 3×3 de RF-08 describen el modo Rubik. En LEGO se aplican RF-14 a RF-17; se comparten carga, recorte, reducción por área y dithering. Los colores disponibles no implican cantidades disponibles: en esta entrega no se limita el consumo por color. Brillo/contraste, guía y exportaciones siguen pendientes.
+
+Paletas, fuentes y límites de fidelidad: [paletas LEGO](lego-palette.md). El catálogo incluye colores históricos; no garantiza disponibilidad de compra. No se mezclan tipos de pieza en un mismo mosaico.
 
 ## Montaje físico y entregas
 

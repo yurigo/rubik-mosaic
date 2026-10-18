@@ -2,15 +2,31 @@
 import { computed, onMounted, ref, shallowRef } from 'vue'
 import CropPreview from './components/CropPreview.vue'
 import MosaicPreview from './components/MosaicPreview.vue'
-import { getCrop, getGeometry, PALETTE, quantize, sampleImage } from './core/mosaic'
+import { countColors, getCrop, getGeometry, getLegoGeometry, PALETTE, quantize, sampleImage } from './core/mosaic'
 import type { Raster } from './core/mosaic'
+import LegoPalette from './components/LegoPalette.vue'
+import { getLegoPalette, LEGO_PARTS } from './core/lego'
+import type { LegoPartId } from './core/lego'
 import { createExample, readImage } from './io/images'
 
 const source = shallowRef<Raster>()
 const fileName = ref('Paisaje de ejemplo')
 const available = ref(9)
-const columns = ref(3)
-const rows = ref(3)
+const material = ref<'rubik' | LegoPartId>('rubik')
+const isLego = computed(() => material.value !== 'rubik')
+const cubeColumns = ref(3)
+const cubeRows = ref(3)
+const legoColumns = ref(32)
+const legoRows = ref(32)
+const columns = computed({ get: () => isLego.value ? legoColumns.value : cubeColumns.value, set: (v) => { if (isLego.value) legoColumns.value = v; else cubeColumns.value = v } })
+const rows = computed({ get: () => isLego.value ? legoRows.value : cubeRows.value, set: (v) => { if (isLego.value) legoRows.value = v; else cubeRows.value = v } })
+const selections = ref(Object.fromEntries(LEGO_PARTS.map((part) => [part.id, getLegoPalette(part.id).map((color) => color.id)])))
+const legoPalette = computed(() => material.value === 'rubik' ? [] : getLegoPalette(material.value))
+const selectedColors = computed({ get: () => selections.value[material.value] ?? [], set: (ids: string[]) => { selections.value[material.value] = ids } })
+const palette = computed(() => isLego.value ? legoPalette.value.filter((color) => selectedColors.value.includes(color.id)) : PALETTE)
+const paletteError = computed(() => palette.value.length ? '' : 'Selecciona al menos un color para generar el mosaico.')
+const shape = computed(() => LEGO_PARTS.find((part) => part.id === material.value)?.shape ?? 'square')
+const baseColor = ref('#FFFFFF')
 const dither = ref(true)
 const strength = ref(80)
 const grid = ref(true)
@@ -22,7 +38,7 @@ const imageError = ref('')
 let loadRequest = 0
 
 const layout = computed(() => {
-  try { return { geometry: getGeometry(available.value, columns.value, rows.value), error: '' } }
+  try { return { geometry: isLego.value ? getLegoGeometry(columns.value, rows.value) : getGeometry(available.value, columns.value, rows.value), error: '' } }
   catch (error) { return { geometry: undefined, error: (error as Error).message } }
 })
 const crop = computed(() => source.value && layout.value.geometry
@@ -34,8 +50,10 @@ const samples = computed(() => {
 })
 const mosaic = computed(() => {
   const geometry = layout.value.geometry
-  return samples.value && geometry ? quantize(samples.value, geometry.width, geometry.height, dither.value ? strength.value / 100 : 0) : undefined
+  return samples.value && geometry && !paletteError.value ? quantize(samples.value, geometry.width, geometry.height, dither.value ? strength.value / 100 : 0, palette.value) : undefined
 })
+
+const consumption = computed(() => mosaic.value ? countColors(mosaic.value) : {})
 
 function resetCrop() { zoom.value = 1; horizontal.value = 50; vertical.value = 50 }
 function useExample() {
@@ -80,7 +98,7 @@ onMounted(useExample)
 
     <main>
       <section class="intro">
-        <div><p class="eyebrow">DE UNA IMAGEN A ALGO QUE PUEDES CONSTRUIR</p><h1>Tu imagen,<br class="mobile-break" /> cubo a cubo<span>.</span></h1><p class="intro-copy">Un poco de color. Un poco de paciencia. Un mosaico muy tuyo.</p></div>
+        <div><p class="eyebrow">DE UNA IMAGEN A ALGO QUE PUEDES CONSTRUIR</p><h1>Tu imagen,<br class="mobile-break" /> pieza a pieza<span>.</span></h1><p class="intro-copy">Un poco de color. Un poco de paciencia. Un mosaico muy tuyo.</p></div>
         <div class="edition"><span>EL TALLER</span><strong>01 <span>/ Mosaicos</span></strong></div>
       </section>
 
@@ -95,20 +113,31 @@ onMounted(useExample)
           </section>
 
           <section class="control-section">
-            <h2><span class="step">02</span> Tus cubos</h2>
-            <div class="number-fields">
-              <label>Disponibles<input v-model.number="available" type="number" min="1" max="2500" step="1" inputmode="numeric" :aria-invalid="!!layout.error" /></label>
-              <label>Columnas<input v-model.number="columns" type="number" min="1" max="2500" step="1" inputmode="numeric" :aria-invalid="!!layout.error" /></label>
-              <label>Filas<input v-model.number="rows" type="number" min="1" max="2500" step="1" inputmode="numeric" :aria-invalid="!!layout.error" /></label>
+            <h2><span class="step">02</span> Tus piezas</h2>
+            <label class="material-label">Material<select v-model="material"><option value="rubik">Cubos de Rubik 3×3</option><option v-for="part in LEGO_PARTS" :key="part.id" :value="part.id">{{ part.name }}</option></select></label>
+            <div class="number-fields" :class="{ 'lego-dimensions': isLego }">
+              <label v-if="!isLego">Disponibles<input v-model.number="available" type="number" min="1" max="2500" step="1" inputmode="numeric" :aria-invalid="!!layout.error" /></label>
+              <label>Columnas<input v-model.number="columns" type="number" min="1" :max="isLego ? 22500 : 2500" step="1" inputmode="numeric" :aria-invalid="!!layout.error" /></label>
+              <label>Filas<input v-model.number="rows" type="number" min="1" :max="isLego ? 22500 : 2500" step="1" inputmode="numeric" :aria-invalid="!!layout.error" /></label>
             </div>
-            <div class="presets"><span>Probar con</span><button v-for="side in [3, 10, 30]" :key="side" type="button" :class="{ active: available === side * side && columns === side && rows === side }" @click="preset(side)">{{ side * side }}</button><span>cubos</span></div>
+            <p v-if="isLego" class="control-hint">Una pieza = un píxel. Columnas y filas en piezas.</p>
+            <div v-else class="presets"><span>Probar con</span><button v-for="side in [3, 10, 30]" :key="side" type="button" :class="{ active: available === side * side && columns === side && rows === side }" @click="preset(side)">{{ side * side }}</button><span>cubos</span></div>
             <p v-if="layout.error" class="error-message" role="alert">{{ layout.error }}</p>
-            <div v-else-if="layout.geometry" class="resolution-box" aria-live="polite"><div><span>Resolución del mosaico</span><strong>{{ layout.geometry.width }} <small>×</small> {{ layout.geometry.height }} <em>px</em></strong></div><span class="resolution-note">{{ layout.geometry.used }} cubos · {{ layout.geometry.remaining }} sobrantes</span></div>
+            <div v-else-if="layout.geometry" class="resolution-box" aria-live="polite"><div><span>Resolución del mosaico</span><strong>{{ layout.geometry.width }} <small>×</small> {{ layout.geometry.height }} <em>px</em></strong></div><span class="resolution-note">{{ layout.geometry.used }} {{ isLego ? 'piezas' : 'cubos' }}<template v-if="!isLego"> · {{ layout.geometry.remaining }} sobrantes</template></span></div>
+          </section>
+
+          <section v-if="isLego" class="control-section lego-controls">
+            <h2>Los colores de tu caja</h2>
+            <LegoPalette v-model="selectedColors" :colors="legoPalette" />
+            <p class="control-hint">Marca los colores que tienes. Sin límites de cantidad por color. Muestras de pantalla aproximadas; incluye colores históricos.</p>
+            <a class="text-button" :href="`https://www.bricklink.com/v2/catalog/catalogitem.page?P=${material}#T=C`" target="_blank" rel="noopener noreferrer">Ver pieza en BrickLink ↗</a>
+            <p v-if="paletteError" class="error-message" role="alert">{{ paletteError }}</p>
+            <label v-if="shape === 'round'" class="base-label">Color de la base<input v-model="baseColor" type="color" /><span>Solo previsualización; la base no cuenta como piezas.</span></label>
           </section>
 
           <section class="control-section">
             <h2><span class="step">03</span> Encuadra a tu gusto</h2>
-            <label class="range-label">Ampliación <output>{{ zoom.toFixed(1) }}×</output><input v-model.number="zoom" type="range" min="1" max="4" step="0.1" /></label>
+            <label class="range-label" for="zoom">Ampliación <output>{{ zoom.toFixed(1) }}×</output><input id="zoom" v-model.number="zoom" type="range" min="1" max="4" step="0.1" /></label>
             <label class="range-label">Posición horizontal<input v-model.number="horizontal" type="range" min="0" max="100" /></label>
             <label class="range-label">Posición vertical<input v-model.number="vertical" type="range" min="0" max="100" /></label>
             <button class="text-button subtle" type="button" @click="resetCrop">Restablecer encuadre</button>
@@ -118,19 +147,20 @@ onMounted(useExample)
             <h2><span class="step">04</span> Mezcla los colores</h2>
             <div class="segmented" role="group" aria-label="Modo de conversión"><button type="button" :aria-pressed="!dither" :class="{ selected: !dither }" @click="dither = false">Colores planos</button><button type="button" :aria-pressed="dither" :class="{ selected: dither }" @click="dither = true">Dithering</button></div>
             <p class="control-hint">El dithering mezcla pequeñas casillas para sugerir más tonos.</p>
-            <label class="range-label" :class="{ muted: !dither }">Intensidad <output>{{ strength }} %</output><input v-model.number="strength" type="range" min="0" max="100" :disabled="!dither" /></label>
+            <label class="range-label" for="strength" :class="{ muted: !dither }">Intensidad <output>{{ strength }} %</output><input id="strength" v-model.number="strength" type="range" min="0" max="100" :disabled="!dither" /></label>
           </section>
         </aside>
 
         <section class="preview-area" aria-label="Vista previa" :aria-busy="loading">
-          <div class="preview-toolbar"><div><span class="status-dot" /><span>{{ loading ? 'Abriendo tu imagen' : 'Vista previa' }}</span></div><label class="checkbox-label"><input v-model="grid" type="checkbox" /> Ver cubos 3×3</label></div>
+          <div class="preview-toolbar"><div><span class="status-dot" /><span>{{ loading ? 'Abriendo tu imagen' : 'Vista previa' }}</span></div><label class="checkbox-label"><input v-model="grid" type="checkbox" /> {{ isLego ? 'Ver límites de piezas' : 'Ver cubos 3×3' }}</label></div>
           <div v-if="source && crop && mosaic" class="comparison">
             <figure class="preview-card"><figcaption><span>Tu punto de partida</span><span class="caption-number">01</span></figcaption><div class="canvas-stage"><CropPreview :source="source" :crop="crop" /></div><p class="image-caption" :title="fileName">{{ fileName }}</p></figure>
-            <figure class="preview-card result-card"><figcaption><span>Tu mosaico</span><span class="caption-number">02</span></figcaption><div class="canvas-stage"><MosaicPreview :mosaic="mosaic" :grid="grid" /></div><p class="image-caption">{{ mosaic.width }} × {{ mosaic.height }} casillas · 6 colores</p></figure>
+            <figure class="preview-card result-card"><figcaption><span>Tu mosaico</span><span class="caption-number">02</span></figcaption><div class="canvas-stage"><MosaicPreview :mosaic="mosaic" :grid="grid" :palette="palette" :group-size="isLego ? 1 : 3" :shape="shape" :base-color="baseColor" /></div><p class="image-caption">{{ mosaic.width }} × {{ mosaic.height }} casillas · {{ palette.length }} colores disponibles</p></figure>
           </div>
-          <div v-else class="preview-empty" role="status"><span aria-hidden="true">▦</span><h2>Un espacio para tu mosaico</h2><p>{{ layout.error ? 'Ajusta la disposición de tus cubos para ver el resultado.' : 'Sube una imagen o prueba nuestro paisaje.' }}</p></div>
-          <div class="palette-strip"><span class="palette-label">SEIS COLORES.<br />INFINITAS IDEAS.</span><div class="palette-colors"><span v-for="color in PALETTE" :key="color.id" class="palette-chip" :style="{ '--chip-color': color.hex }" :title="color.name"><i aria-hidden="true" /><span>{{ color.name }}</span></span></div></div>
-          <div class="preview-footnote"><p><span aria-hidden="true">↳</span> ¿Pocos cubos? Prueba un encuadre sencillo y con buen contraste.</p><span>Patrón visual · montaje pendiente de verificar</span></div>
+          <div v-else class="preview-empty" role="status"><span aria-hidden="true">▦</span><h2>Un espacio para tu mosaico</h2><p>{{ paletteError || layout.error || 'Sube una imagen o prueba nuestro paisaje.' }}</p></div>
+          <div v-if="!isLego" class="palette-strip"><span class="palette-label">SEIS COLORES.<br />INFINITAS IDEAS.</span><div class="palette-colors"><span v-for="color in PALETTE" :key="color.id" class="palette-chip" :style="{ '--chip-color': color.hex }" :title="color.name"><i aria-hidden="true" /><span>{{ color.name }}</span></span></div></div>
+          <section v-if="isLego && mosaic" class="consumption" aria-label="Piezas necesarias por color"><h2>Piezas necesarias · {{ mosaic.width * mosaic.height }} en total</h2><p class="control-hint">{{ Object.keys(consumption).length }} colores utilizados · referencia de color BrickLink</p><ul><li v-for="color in legoPalette.filter((item) => consumption[item.id])" :key="color.id"><i :style="{ background: color.hex }" aria-hidden="true" /><span>{{ color.name }} <small>#{{ color.bricklinkId }}</small></span><strong>{{ consumption[color.id] }}</strong></li></ul></section>
+          <div class="preview-footnote"><p><span aria-hidden="true">↳</span> ¿Pocas piezas? Prueba un encuadre sencillo y con buen contraste.</p><span>{{ isLego ? 'Paleta sólida · colores aproximados · base no incluida' : 'Patrón visual · montaje pendiente de verificar' }}</span></div>
         </section>
       </div>
     </main>
