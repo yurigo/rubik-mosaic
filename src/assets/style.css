@@ -96,3 +96,24 @@ canvas { display: block; max-width: 100%; max-height: 100%; width: auto; height:
 @media (max-width: 1050px) { .app-shell { padding: 0 4%; } .workspace { grid-template-columns: 260px minmax(0, 1fr); } .controls { padding: 4px 18px; } .preview-area { padding: 25px 20px; } .comparison { gap: 12px; } .preview-card { padding: 11px; } .palette-strip { flex-direction: column; align-items: flex-start; gap: 14px; } .palette-label br { display: none; } .palette-colors { width: 100%; justify-content: space-between; gap: 7px; } }
 @media (max-width: 760px) { .app-shell { padding: 0 5%; } .site-header { min-height: 75px; } .header-note { max-width: 120px; font-size: 9px; line-height: 1.4; } .brand { font-size: 22px; gap: 9px; } .intro { padding: 31px 0 25px; } .eyebrow { max-width: 230px; font-size: 8px; line-height: 1.7; letter-spacing: 1.3px; } h1 { letter-spacing: -1.8px; font-size: 39px; } .mobile-break { display: block; } .intro-copy { max-width: 270px; font-size: 12px; line-height: 1.6; } .edition { display: none; } .workspace { display: flex; flex-direction: column; } .controls { border-right: 0; padding: 0 20px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 24px; } .control-section { min-width: 0; padding: 22px 0; } .control-section:nth-child(3) { border-bottom: 0; } .preview-area { border-top: 1px solid #e0e3d9; padding: 22px 18px; } .preview-toolbar { margin-bottom: 20px; } .palette-strip { flex-direction: row; align-items: center; gap: 15px; } .palette-label br { display: block; } .palette-colors { gap: 5px; } .palette-chip { min-width: 23px; font-size: 7px; } .palette-chip i { width: 23px; height: 23px; } .site-footer { font-size: 8px; line-height: 1.6; } }
 @media (max-width: 480px) { .controls { display: block; padding: 0 19px; } .control-section:nth-child(3) { border-bottom: 1px solid #e8e9e0; } .comparison { grid-template-columns: minmax(0, 1fr); gap: 17px; } .preview-card { padding: 14px; } .canvas-stage { max-height: 340px; } .palette-strip { flex-direction: column; align-items: flex-start; } .palette-label br { display: none; } .palette-chip i { width: 30px; height: 30px; } .palette-chip { font-size: 8px; } .preview-footnote > span { font-size: 9px; } }
+
+.material-label, .color-search { display: block; font-size: 11px; color: #5e6f53; margin-bottom: 14px; }
+.material-label select, .color-search input { display: block; width: 100%; min-height: 40px; margin-top: 7px; border: 1px solid #cbd4c1; border-radius: 5px; padding: 7px; background: #fffefa; color: #29372e; font: inherit; }
+select:focus-visible { outline: 3px solid #2469a4; outline-offset: 3px; }
+.number-fields.lego-dimensions { grid-template-columns: 1fr 1fr; }
+.lego-palette { border: 0; padding: 0; margin: 0; min-width: 0; }
+.lego-palette legend { font-size: 11px; padding: 0 0 12px; }
+.palette-actions { display: flex; gap: 10px; margin-bottom: 10px; }
+.palette-actions button { background: #eef1e7; border: 1px solid #cbd4c1; border-radius: 4px; color: #445b38; padding: 8px 12px; font-size: 11px; min-height: 36px; }
+.color-options { max-height: 280px; overflow-y: auto; overscroll-behavior: contain; border-block: 1px solid #e0e4d7; }
+.color-option { display: flex; align-items: center; gap: 8px; min-height: 44px; font-size: 11px; cursor: pointer; }
+.color-option i, .consumption i { width: 24px; height: 24px; flex-shrink: 0; border-radius: 4px; box-shadow: inset 0 0 0 1px #24312230; }
+.color-option small, .consumption small { color: #6c756d; }
+.base-label { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 11px; margin-top: 18px; }
+.base-label span { width: 100%; font-size: 10px; line-height: 1.5; }
+.consumption { margin-top: 28px; padding-block: 20px; border-block: 1px solid #d9ddd2; }
+.consumption h2 { margin-bottom: 6px; }
+.consumption ul { list-style: none; padding: 0; margin: 12px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px 20px; }
+.consumption li { display: flex; align-items: center; gap: 8px; font-size: 11px; min-height: 32px; }
+.consumption strong { margin-left: auto; font-variant-numeric: tabular-nums; }
+@media (min-width: 481px) and (max-width: 760px) { .lego-controls { grid-column: 1 / -1; } }

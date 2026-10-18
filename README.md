@@ -48,3 +48,7 @@ Mantener **`master`** como rama de producción. La integración genera previews 
 Para probar una rama que ya existía al conectar Vercel, usar **Deployments → Create Deployment** e indicar su nombre. Si `master` aún contiene solo documentación, su primer despliegue no podrá compilar la aplicación hasta integrar la primera PR de código; la rama de la PR sí contiene la aplicación.
 
 Documentación del proveedor: [GitHub y previews](https://vercel.com/docs/git/vercel-for-github), [despliegue por referencia Git](https://vercel.com/docs/git).
+
+## Mosaicos LEGO
+
+Selecciona plate 3024, tile cuadrada 3070 o tile redonda 98138, introduce ancho y alto en piezas y marca los colores de tu caja. El editor genera el patrón con esa selección y muestra las piezas necesarias por color. Una pieza equivale a un píxel; no hay límites de cantidad por color. [Fuentes y actualización de paletas](docs/lego-palette.md).

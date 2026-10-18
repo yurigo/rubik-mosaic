@@ -66,3 +66,11 @@ Coordenadas de datos desde cero, origen arriba izquierda, lectura por filas; coo
 2. Implementar motor y editor sobre esos contratos: RF-01 a RF-08 y RF-12. Motor e interfaz pueden desarrollarse por separado tras acordar entradas/salidas.
 3. Añadir guía y exportaciones: RF-09 a RF-11; verificar ida/vuelta exacta del patrón y orientación de bloques.
 4. Validar el recorrido, accesibilidad, rendimiento y errores. Resolver la viabilidad física antes de declarar RF-13 completado.
+
+## Materiales y paletas variables
+
+`quantize` acepta una paleta explícita y mantiene la de Rubik como valor por defecto. Valida paletas no vacías, IDs únicos y hexadecimales sRGB; desempata por orden de la paleta recibida. `getLegoGeometry` permite hasta 22.500 píxeles, el mismo presupuesto de casillas que 2.500 cubos Rubik. `countColors` cuenta la matriz final. No se aplican cuotas por color.
+
+`src/core/lego.ts` mantiene IDs BrickLink con prefijo `BL-` y las combinaciones de pieza/color verificadas. La interfaz conserva disposición Rubik y LEGO por separado y selecciones independientes por pieza. La selección solo cambia la cuantización; el recorte y la reducción se reutilizan. Los acabados y la base redonda se dibujan únicamente en Canvas. Fuentes: [paletas LEGO](lego-palette.md).
+
+El contrato JSON anterior es una propuesta de Rubik aún sin implementar; habrá que ampliarlo con material, pieza y paleta antes de implementar RF-11 para ambos modos.
