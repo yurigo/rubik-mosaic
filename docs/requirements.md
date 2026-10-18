@@ -37,7 +37,7 @@ Los criterios siguientes definen la propuesta verificable del MVP visual, salvo 
 |---|---|---|
 | RF-01 | Cargar JPEG, PNG y WebP estáticos | La imagen aparece orientada correctamente. Un archivo inválido produce un error legible y conserva el proyecto anterior. |
 | RF-02 | Configurar inventario y disposición | Rechaza cero, negativos, decimales y C×F>N; muestra usados, sobrantes y resolución. N=9,C=3,F=3 produce 9×9. |
-| RF-03 | Recortar sin deformar | Recorte con proporción C/F, desplazamiento y ampliación de imagen; casillas cuadradas. |
+| RF-03 | Recortar sin deformar | Recorte con proporción C/F y casillas cuadradas. Arrastrar desplaza el encuadre; pellizco y rueda amplían entre 1× y 4× sin salir de la imagen. Botones +/− y restablecimiento sobre la vista original. Con la imagen enfocada, +/− amplían, flechas desplazan e Inicio restablece; no intercepta atajos en otros campos ni Ctrl/Cmd. |
 | RF-04 | Reducir a la resolución objetivo | La matriz tiene exactamente 3F filas de 3C valores. La ampliación no suaviza las casillas. |
 | RF-05 | Cuantizar a seis colores | Toda casilla usa un identificador de la paleta. Los datos exportados no contienen un séptimo color. |
 | RF-06 | Configurar dithering | Opciones sin dithering y Floyd–Steinberg, intensidad 0–100 %. Al 0 % coincide con la conversión sin dithering; se procesa la cuadrícula completa. |
