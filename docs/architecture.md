@@ -94,3 +94,7 @@ La reducción por área, saturación a [0,1] al visitar una muestra y difusión 
 `quantize` recibe un séptimo argumento opcional de colores forzados, uno por casilla; rechaza IDs fuera de paleta o longitud incorrecta. Una casilla forzada se escribe directamente, descarta error entrante y no lo propaga. La difusión tampoco deposita error en casillas forzadas. Sin reglas, RF-18 conserva su comportamiento anterior. Entrada original, muestras y máscaras no se mutan.
 
 `CropPreview` recibe `selecting` y `selection?: RegionMask`; emite `select {x,y}` en coordenadas absolutas de la fuente. Dibuja una superposición turquesa sin alterar la fuente. `RegionControls` administra la intención mediante props/emits; el estado y la coordinación permanecen en el editor. El modo explícito de selección permite separar toque de selección y gestos de encuadre.
+
+## Navegación del encuadre (RF-03)
+
+`CropViewport` envuelve la vista original mediante un slot y emite zoom y posiciones normalizadas; no modifica el raster ni el algoritmo de reducción. `crop-navigation.ts` transforma desplazamiento y ampliación manteniendo el punto de origen bajo el cursor o el centro del pellizco, salvo límites de la imagen. Usa Pointer Events y captura de puntero; al cambiar el número de dedos toma una nueva referencia para evitar saltos. Rueda no pasiva solo en el área de imagen; Ctrl/Cmd conservan el zoom del navegador. Las teclas solo actúan con el área enfocada. `disabled` desactiva navegación y botones para reservar el área a una herramienta de selección. No hay dependencias adicionales.
