@@ -1,0 +1,15 @@
+[
+  { "name": "Montaña turquesa del ejemplo", "hex": "#167C7E" },
+  { "name": "Montaña azul del ejemplo", "hex": "#11449A" },
+  { "name": "Cuerpo gris Lechonk (muestra opaca)", "hex": "#4E585C" },
+  { "name": "Gris neutro oscuro", "hex": "#505050" },
+  { "name": "Gris neutro medio", "hex": "#808080" },
+  { "name": "Gris neutro claro", "hex": "#C8C8C8" },
+  { "name": "Gris claro: límite del método ponderado", "hex": "#D2D2D2" },
+  { "name": "Marfil de prueba", "hex": "#EAE3B9" },
+  { "name": "Rojo", "hex": "#D03035" },
+  { "name": "Verde", "hex": "#238B45" },
+  { "name": "Amarillo", "hex": "#F4D430" },
+  { "name": "Naranja", "hex": "#EB8634" },
+  { "name": "Violeta", "hex": "#7744AA" }
+]

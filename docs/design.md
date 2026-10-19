@@ -32,7 +32,9 @@ Selector de material junto a la disposición. LEGO muestra dimensiones en piezas
 
 ## Comparación de colores
 
-Select etiquetado «Método de comparación de colores» junto a los controles de conversión, independiente del dithering. Ofrece RGB lineal, OKLab y HSL · experimental, con una descripción asociada a la opción actual. Mantener el resto de ajustes al cambiarlo para poder comparar. RGB es la opción inicial.
+Select etiquetado «Método de comparación de colores» junto a los controles de conversión, independiente del dithering. Ofrece RGB lineal, OKLab, OKLab · conservar color, CIELAB · CIEDE2000 y HSL · experimental, con una descripción asociada a la opción actual. Mantener el resto de ajustes al cambiarlo para poder comparar. RGB es la opción inicial.
+
+«Comparar métodos de color» es un desplegable debajo del workspace, fuera de la vista sticky y antes del consumo de piezas. Cerrado inicialmente; solo al abrir calcula las cinco vistas, con la misma configuración actual. Tarjetas en rejilla adaptable a una columna en móvil, sin scroll interno; conservan la proporción de la imagen y muestran nombre, descripción y botón «Usar este método». El botón de la opción elegida indica «Método seleccionado», con `aria-pressed`. Elegir una tarjeta actualiza el selector principal y el consumo; no cambia el encuadre ni los ajustes. Una nota recomienda empezar con colores planos y explica los límites experimentales.
 
 ## Correcciones por zonas
 

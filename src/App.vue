@@ -9,6 +9,7 @@ import type { Crop } from './core/mosaic'
 import CropPreview from './components/CropPreview.vue'
 import CropViewport from './components/CropViewport.vue'
 import MosaicPreview from './components/MosaicPreview.vue'
+import ColorComparison from './components/ColorComparison.vue'
 import { countColors, getGeometry, getLegoGeometry, PALETTE, quantize, sampleImage } from './core/mosaic'
 import type { Raster } from './core/mosaic'
 import LegoPalette from './components/LegoPalette.vue'
@@ -270,6 +271,7 @@ onMounted(useExample)
           <div class="preview-footnote"><p><span aria-hidden="true">↳</span> ¿Pocas piezas? Prueba un encuadre sencillo y con buen contraste.</p><span>{{ isLego ? 'Paleta sólida · colores aproximados · base no incluida' : 'Patrón visual · montaje pendiente de verificar' }}</span></div>
         </section>
       </div>
+      <ColorComparison v-if="samples && mosaic" :samples="samples" :width="mosaic.width" :height="mosaic.height" :palette="palette" :strength="dither ? strength / 100 : 0" :forced-colors="forcedColors" :method="colorMethod" :grid="grid" :group-size="isLego ? 1 : 3" :shape="shape" :base-color="baseColor" @choose="colorMethod = $event" />
       <section v-if="isLego && mosaic" class="consumption" aria-label="Piezas necesarias por color"><h2>Piezas necesarias · {{ mosaic.width * mosaic.height }} en total</h2><p class="control-hint">{{ Object.keys(consumption).length }} colores utilizados · referencia de color BrickLink</p><ul><li v-for="color in legoPalette.filter((item) => consumption[item.id])" :key="color.id"><i :style="{ background: color.hex }" aria-hidden="true" /><span>{{ color.name }} <small>#{{ color.bricklinkId }}</small></span><strong>{{ consumption[color.id] }}</strong></li></ul></section>
     </main>
     <CropEditor v-if="cropEditorOpen && source && bounds" :source="source" :initial="bounds" @apply="applyCrop" @cancel="cropEditorOpen = false" />
