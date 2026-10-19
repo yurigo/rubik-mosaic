@@ -52,3 +52,9 @@ Documentación del proveedor: [GitHub y previews](https://vercel.com/docs/git/ve
 ## Mosaicos LEGO
 
 Selecciona plate 3024, tile cuadrada 3070 o tile redonda 98138, introduce ancho y alto en piezas y marca los colores de tu caja. El editor genera el patrón con esa selección y muestra las piezas necesarias por color. Una pieza equivale a un píxel; no hay límites de cantidad por color. [Fuentes y actualización de paletas](docs/lego-palette.md).
+
+### Correcciones por zonas
+
+En «Dirige los colores», activa «Seleccionar una zona» y toca la imagen original. Ajusta la tolerancia, elige un color disponible y aplica la regla. La marca turquesa permite revisar la selección; Ver zona y Eliminar gestionan las reglas guardadas durante la sesión. Con teclado, enfoca la imagen, mueve la cruz con las flechas y pulsa Intro o Espacio.
+
+Las reglas siguen a la imagen al cambiar el encuadre. Una casilla se fuerza si al menos la mitad de su área pertenece a la zona; un detalle pequeño puede requerir más piezas o un recorte más cercano. Los colores retirados de la paleta suspenden sus reglas. Cargar otra imagen limpia las reglas; no se guardan entre recargas.
