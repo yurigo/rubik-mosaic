@@ -66,7 +66,9 @@ Paletas, fuentes y límites de fidelidad: [paletas LEGO](lego-palette.md). El ca
 
 ## Comparación de colores
 
-**RF-18:** seleccionar RGB lineal, OKLab o HSL experimental en Rubik y LEGO. RGB lineal es el valor inicial y reproduce los resultados anteriores. Cambiar método regenera el resultado sin modificar imagen, recorte, disposición, paleta o intensidad. El método afecta únicamente a la distancia para escoger un color; reducción y difusión del error siguen en RGB lineal. Todos los métodos respetan la paleta seleccionada, también con dithering. La elección se conserva durante la sesión y no se persiste entre recargas. No se garantiza una interpretación semántica de objetos ni una mejora visual para toda imagen.
+**RF-18:** seleccionar RGB lineal, OKLab, OKLab · conservar color (experimental), CIELAB · CIEDE2000 o HSL experimental en Rubik y LEGO. RGB lineal es el valor inicial y reproduce los resultados anteriores. Cambiar método regenera el resultado sin modificar imagen, recorte, disposición, paleta o intensidad. El método afecta únicamente a la distancia para escoger un color; reducción y difusión del error siguen en RGB lineal. Todos los métodos respetan la paleta seleccionada, también con dithering. La elección se conserva durante la sesión y no se persiste entre recargas. No se garantiza una interpretación semántica de objetos ni una mejora visual para toda imagen.
+
+El desplegable «Comparar métodos de color», debajo del editor y cerrado inicialmente, muestra la misma matriz con los cinco métodos y permite adoptar uno. Respeta material, forma de pieza, base, cuadrícula, reglas e intensidad actuales. Cerrado no calcula conversiones adicionales. No añade scroll interno al panel de controles. Las limitaciones y el banco reproducible están en [comparación de color](color-comparison.md).
 
 ## Montaje físico y entregas
 

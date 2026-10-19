@@ -54,7 +54,7 @@ test('RF-19: last active rule wins, missing colors suspend rules without mutatin
 
 test('RF-19: all methods respect forced colors; imposed colors do not diffuse errors to neighbors', () => {
   const samples = new Float32Array([1, 1, 1, .8, .8, .8, .4, .4, .4])
-  for (const method of ['rgb', 'oklab', 'hsl'] as const) for (const strength of [0, .8, 1]) {
+  for (const method of ['rgb', 'oklab', 'oklab-color', 'ciede2000', 'hsl'] as const) for (const strength of [0, .8, 1]) {
     const result = quantize(samples, 3, 1, strength, blackWhite, method, [undefined, 'black', undefined])
     assert.equal(result.pixels[1], 'black')
     assert.equal(result.pixels[2], quantize(samples.slice(6), 1, 1, 0, blackWhite, method).pixels[0])

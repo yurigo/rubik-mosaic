@@ -1,4 +1,4 @@
-import { COLOR_METHODS, comparisonCoordinates } from './color-distance.ts'
+import { COLOR_METHODS, colorDistanceSquared, comparisonCoordinates } from './color-distance.ts'
 import type { ColorMethod } from './color-distance.ts'
 
 export const PALETTE = [
@@ -96,7 +96,7 @@ export function quantize(samples: Float32Array, width: number, height: number, s
       let nearest = 0
       let distance = Infinity
       paletteCoordinates.forEach((color, candidate) => {
-        const d = color.reduce((sum, v, channel) => sum + (v - coordinates[channel]) ** 2, 0)
+        const d = colorDistanceSquared(color, coordinates, method)
         if (d < distance) { distance = d; nearest = candidate }
       })
       pixels.push(palette[nearest].id)
