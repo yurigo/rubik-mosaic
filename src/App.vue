@@ -102,6 +102,7 @@ function applyRegion() {
   regionPoint.value = undefined
 }
 function removeRegion(id: number) { rules.value = rules.value.filter(rule => rule.id !== id); viewedMask.value = undefined }
+function regionDisclosure(event: Event) { if (!(event.currentTarget as HTMLDetailsElement).open) selecting.value = false }
 function previewRegion(id: number) { regionPoint.value = undefined; viewedMask.value = rules.value.find(rule => rule.id === id)?.mask }
 
 
@@ -221,7 +222,10 @@ onMounted(useExample)
 
           <section v-if="isLego" class="control-section lego-controls">
             <h2>Los colores de tu caja</h2>
-            <LegoPalette v-model="selectedColors" :colors="legoPalette" />
+            <details class="control-disclosure">
+              <summary>Elegir colores · {{ selectedColors.length }} de {{ legoPalette.length }}</summary>
+              <LegoPalette v-model="selectedColors" :colors="legoPalette" />
+            </details>
             <p class="control-hint">Marca los colores que tienes. Sin límites de cantidad por color. Muestras de pantalla aproximadas; incluye colores históricos.</p>
             <a class="text-button" :href="`https://www.bricklink.com/v2/catalog/catalogitem.page?P=${material}#T=C`" target="_blank" rel="noopener noreferrer">Ver pieza en BrickLink ↗</a>
             <p v-if="paletteError" class="error-message" role="alert">{{ paletteError }}</p>
@@ -242,11 +246,14 @@ onMounted(useExample)
             <p class="control-hint">El dithering mezcla pequeñas casillas para sugerir más tonos.</p>
             <label class="range-label" for="strength" :class="{ muted: !dither }">Intensidad <output>{{ strength }} %</output><input id="strength" v-model.number="strength" type="range" min="0" max="100" :disabled="!dither" /></label>
           </section>
+          <details v-if="source" class="control-disclosure region-disclosure" @toggle="regionDisclosure">
+            <summary>Corregir zonas <span v-if="rules.length">· {{ rules.length }} reglas</span><span v-if="selecting"> · selección activa</span></summary>
+            <RegionControls v-model:selecting="selecting" v-model:tolerance="tolerance" v-model:color-id="regionColor" :palette="palette" :rules="rules" :has-selection="!!draftMask" :cell-count="draftCellCount" @apply="applyRegion" @cancel="cancelRegion" @remove="removeRegion" @preview="previewRegion" />
+          </details>
         </aside>
 
         <section class="preview-area" aria-label="Vista previa" :aria-busy="loading">
           <div class="preview-toolbar"><div><span class="status-dot" /><span>{{ loading ? 'Abriendo tu imagen' : 'Vista previa' }}</span></div><label class="checkbox-label"><input v-model="grid" type="checkbox" /> {{ isLego ? 'Ver límites de piezas' : 'Ver cubos 3×3' }}</label></div>
-          <RegionControls v-if="source" v-model:selecting="selecting" v-model:tolerance="tolerance" v-model:color-id="regionColor" :palette="palette" :rules="rules" :has-selection="!!draftMask" :cell-count="draftCellCount" @apply="applyRegion" @cancel="cancelRegion" @remove="removeRegion" @preview="previewRegion" />
           <div v-if="source && crop && mosaic" class="comparison">
             <figure class="preview-card">
               <figcaption><span>Tu punto de partida</span><span class="caption-number">01</span></figcaption>
@@ -259,10 +266,11 @@ onMounted(useExample)
           </div>
           <div v-else class="preview-empty" role="status"><span aria-hidden="true">▦</span><h2>Un espacio para tu mosaico</h2><p>{{ paletteError || layout.error || 'Sube una imagen o prueba nuestro paisaje.' }}</p></div>
           <div v-if="!isLego" class="palette-strip"><span class="palette-label">SEIS COLORES.<br />INFINITAS IDEAS.</span><div class="palette-colors"><span v-for="color in PALETTE" :key="color.id" class="palette-chip" :style="{ '--chip-color': color.hex }" :title="color.name"><i aria-hidden="true" /><span>{{ color.name }}</span></span></div></div>
-          <section v-if="isLego && mosaic" class="consumption" aria-label="Piezas necesarias por color"><h2>Piezas necesarias · {{ mosaic.width * mosaic.height }} en total</h2><p class="control-hint">{{ Object.keys(consumption).length }} colores utilizados · referencia de color BrickLink</p><ul><li v-for="color in legoPalette.filter((item) => consumption[item.id])" :key="color.id"><i :style="{ background: color.hex }" aria-hidden="true" /><span>{{ color.name }} <small>#{{ color.bricklinkId }}</small></span><strong>{{ consumption[color.id] }}</strong></li></ul></section>
+
           <div class="preview-footnote"><p><span aria-hidden="true">↳</span> ¿Pocas piezas? Prueba un encuadre sencillo y con buen contraste.</p><span>{{ isLego ? 'Paleta sólida · colores aproximados · base no incluida' : 'Patrón visual · montaje pendiente de verificar' }}</span></div>
         </section>
       </div>
+      <section v-if="isLego && mosaic" class="consumption" aria-label="Piezas necesarias por color"><h2>Piezas necesarias · {{ mosaic.width * mosaic.height }} en total</h2><p class="control-hint">{{ Object.keys(consumption).length }} colores utilizados · referencia de color BrickLink</p><ul><li v-for="color in legoPalette.filter((item) => consumption[item.id])" :key="color.id"><i :style="{ background: color.hex }" aria-hidden="true" /><span>{{ color.name }} <small>#{{ color.bricklinkId }}</small></span><strong>{{ consumption[color.id] }}</strong></li></ul></section>
     </main>
     <CropEditor v-if="cropEditorOpen && source && bounds" :source="source" :initial="bounds" @apply="applyCrop" @cancel="cropEditorOpen = false" />
     <footer class="site-footer"><span>Hecho para imaginar con las manos.</span><a href="https://github.com/yurigo/rubik-mosaic" target="_blank" rel="noopener noreferrer">El proyecto en GitHub <span aria-hidden="true">↗</span></a></footer>
