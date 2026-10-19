@@ -41,3 +41,9 @@ Panel «Dirige los colores» sobre la comparación. El botón «Seleccionar una 
 ## Encuadre directo
 
 El original admite arrastrar para mover, pellizcar con dos dedos para ampliar y rueda sobre la imagen para acercar/alejar. Los controles +, −, ampliación actual y Restablecer se muestran sobre la vista, con objetivos táctiles de 44 px. La sección de encuadre explica los gestos y atajos en lugar de mostrar sliders. El área admite foco visible y +/−, flechas e Inicio; las instrucciones completas están asociadas para lectores de pantalla. Los gestos táctiles se reservan al área real de imagen; el resto de la página conserva su desplazamiento. En los límites de zoom, la rueda permite desplazar la página. En modo «Seleccionar zona» se deshabilitan encuadre y botones; «Volver a encuadrar» los reactiva para evitar acciones ambiguas.
+
+## Flujo de recorte y tamaño
+
+El botón «Recortar imagen» aparece junto a la carga. Abre la fuente completa en un modal amplio (pantalla completa en móvil), con exterior oscurecido, tercios y bordes/esquinas arrastrables. Presets Libre/Original/Cuadrado/4:3/16:9, opción de invertir orientación, Aplicar, Cancelar y Restablecer. Al cerrar vuelve el foco al control de origen mediante el diálogo nativo. Es una herramienta distinta del encuadre con zoom y del modo de selección de colores. Usar imagen completa se ofrece tras un recorte aplicado.
+
+«Tus piezas» presenta «Tengo estas piezas» / «Quiero este tamaño». El primero muestra un único presupuesto y el resultado calculado C×F; el segundo muestra dos dimensiones, bloqueo de proporción y «Necesitas N». Ambos muestran la resolución en píxeles con las unidades de material explícitas. No exigir que el usuario multiplique ni introduzca un presupuesto adicional para un tamaño manual. Avisar que una cuadrícula entera puede aproximar la proporción, y mostrar el ajuste real en la comparación.

@@ -1,6 +1,6 @@
 # Especificación de requisitos
 
-Versión 0.5 · 18 de octubre de 2026 · Borrador de producto
+Versión 0.6 · 19 de octubre de 2026 · Borrador de producto
 
 ## Objetivo y alcance
 
@@ -10,7 +10,7 @@ Transformar una imagen en un mosaico de cubos Rubik o piezas LEGO 1×1, adaptado
 
 **Propuesta de primera versión:** cubos estándar 3×3 con una cara visible, sin retirar pegatinas; recorte, ajustes, comparación, guía por cubos y exportación. Los detalles de formatos, límites y entregas siguientes son propuestas revisables. La tecnología decidida se documenta en [arquitectura](architecture.md).
 
-Recorrido: cargar imagen → configurar cubos y disposición → recortar → convertir y ajustar → consultar guía → exportar.
+Recorrido: cargar imagen → recortar opcionalmente → indicar cantidad disponible o tamaño → convertir y ajustar → consultar guía → exportar.
 
 ## Geometría
 
@@ -36,7 +36,7 @@ Los criterios siguientes definen la propuesta verificable del MVP visual, salvo 
 | ID | Requisito | Criterio de aceptación |
 |---|---|---|
 | RF-01 | Cargar JPEG, PNG y WebP estáticos | La imagen aparece orientada correctamente. Un archivo inválido produce un error legible y conserva el proyecto anterior. |
-| RF-02 | Configurar inventario y disposición | Rechaza cero, negativos, decimales y C×F>N; muestra usados, sobrantes y resolución. N=9,C=3,F=3 produce 9×9. |
+| RF-02 | Configurar inventario y disposición | Modo cantidad: propone C×F≤N y muestra usados/sobrantes. Modo tamaño: permite C,F y calcula C×F sin exigir N. Rechaza cero, negativos, decimales y límites excedidos. N=9 con proporción cuadrada propone 3×3 cubos y 9×9 píxeles. Ver RF-21. |
 | RF-03 | Recortar sin deformar | Recorte con proporción C/F y casillas cuadradas. Arrastrar desplaza el encuadre; pellizco y rueda amplían entre 1× y 4× sin salir de la imagen. Botones +/− y restablecimiento sobre la vista original. Con la imagen enfocada, +/− amplían, flechas desplazan e Inicio restablece; no intercepta atajos en otros campos ni Ctrl/Cmd. |
 | RF-04 | Reducir a la resolución objetivo | La matriz tiene exactamente 3F filas de 3C valores. La ampliación no suaviza las casillas. |
 | RF-05 | Cuantizar a seis colores | Toda casilla usa un identificador de la paleta. Los datos exportados no contienen un séptimo color. |
@@ -96,3 +96,10 @@ Fuera del MVP: cuentas, pagos, colaboración, servidor de procesamiento, generac
 ## Correcciones por zonas
 
 **RF-19:** seleccionar por toque/click o teclado una zona conectada de la imagen original recortada, ajustar tolerancia y asignarle un único color de la paleta disponible. Mostrar la máscara antes de aplicar y el número de casillas que cubre al menos a la mitad. Conservar hasta 12 reglas no destructivas durante la sesión; permitir verlas y eliminarlas. La última regla activa prevalece en solapes. Cambiar encuadre, resolución, método o dithering conserva las reglas; cargar una nueva imagen o el ejemplo las limpia. Un color ausente de la paleta actual deja su regla inactiva y advertida, sin eliminarla; vuelve a actuar si el color está disponible de nuevo. Las casillas forzadas respetan la paleta y no reciben ni propagan error de dithering. La selección analiza una versión de hasta 640 píxeles en su lado mayor; los detalles más pequeños pueden no representarse. No se garantiza recuperar un ojo u otro detalle que no cubra al menos la mitad de una casilla. Combinaciones de colores y edición manual de casillas quedan fuera de esta entrega.
+
+## Recorte y tamaño asistido
+
+- **RF-20 Recorte no destructivo:** botón Recortar imagen después de cargar. Editor modal con la fuente completa, selección rectangular movible y ocho tiradores para bordes/esquinas, exterior oscurecido, proporciones Libre/Original/Cuadrado/4:3/16:9 y orientación invertible. Aplicar confirma; Cancelar/Escape conserva el recorte anterior; Restablecer devuelve la selección a toda la imagen dentro del editor. «Usar imagen completa» restaura la fuente completa desde el editor principal. Flechas mueven selección/tiradores enfocados y Mayús aumenta el paso. No reescribe la fuente ni las máscaras de color. Aplicar restablece zoom/pan; el encuadre posterior queda limitado al recorte elegido.
+- **RF-21 Tamaño asistido:** inicialmente «Tengo estas piezas», tanto Rubik como LEGO. El usuario indica un presupuesto; el programa calcula columnas/filas según la proporción del recorte y muestra usados, sobrantes y resolución. «Quiero este tamaño» permite introducir columnas/filas y muestra el total necesario, sin exigir inventario. «Mantener proporción del recorte» se activa inicialmente en modo tamaño: modificar un eje redondea el otro; cambiar recorte o material conserva el último eje editado. Desactivarlo permite tamaño libre. La geometría entera aproxima proporciones; la vista muestra el encuadre final sin deformaciones, sin prometer utilizar todas las piezas. Límites: 2.500 cubos o 22.500 piezas LEGO en total. Una nueva imagen conserva cantidades y modo, adopta su proporción y limpia el recorte previo y las reglas de color.
+
+N, C y F de la sección Geometría se aplican conjuntamente al modo cantidad. En modo tamaño, N no es un dato obligatorio; se muestra la necesidad C×F. La proporción elegida en el editor de imagen es independiente de la cuadrícula entera final: el encuadre puede ajustar ligeramente sus bordes para llenar el lienzo sin estirar. No se añade relleno ni piezas gratuitas en los márgenes.
