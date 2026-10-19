@@ -58,3 +58,7 @@ Selecciona plate 3024, tile cuadrada 3070 o tile redonda 98138, introduce ancho 
 En «Dirige los colores», activa «Seleccionar una zona» y toca la imagen original. Ajusta la tolerancia, elige un color disponible y aplica la regla. La marca turquesa permite revisar la selección; Ver zona y Eliminar gestionan las reglas guardadas durante la sesión. Con teclado, enfoca la imagen, mueve la cruz con las flechas y pulsa Intro o Espacio.
 
 Las reglas siguen a la imagen al cambiar el encuadre. Una casilla se fuerza si al menos la mitad de su área pertenece a la zona; un detalle pequeño puede requerir más piezas o un recorte más cercano. Los colores retirados de la paleta suspenden sus reglas. Cargar otra imagen limpia las reglas; no se guardan entre recargas.
+
+## Recorte y tamaño
+
+«Recortar imagen» permite ajustar un rectángulo libre o con proporción fija sin modificar el original. «Tengo estas piezas» calcula una disposición con el presupuesto disponible; «Quiero este tamaño» calcula cuántas piezas necesitas para las columnas y filas elegidas. El bloqueo de proporción enlaza ambos ejes. Zoom, arrastre y reglas de color siguen funcionando dentro del recorte aplicado.

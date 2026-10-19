@@ -3,10 +3,13 @@ import { computed, onMounted, ref, shallowRef, watch } from 'vue'
 import RegionControls from './components/RegionControls.vue'
 import { createRegionRaster, projectRegions, selectRegion } from './core/regions'
 import type { Point, RegionMask, RegionRule } from './core/regions'
+import CropEditor from './components/CropEditor.vue'
+import { cropWithin, linkedDimension, suggestLayout } from './core/layout'
+import type { Crop } from './core/mosaic'
 import CropPreview from './components/CropPreview.vue'
 import CropViewport from './components/CropViewport.vue'
 import MosaicPreview from './components/MosaicPreview.vue'
-import { countColors, getCrop, getGeometry, getLegoGeometry, PALETTE, quantize, sampleImage } from './core/mosaic'
+import { countColors, getGeometry, getLegoGeometry, PALETTE, quantize, sampleImage } from './core/mosaic'
 import type { Raster } from './core/mosaic'
 import LegoPalette from './components/LegoPalette.vue'
 import { getLegoPalette, LEGO_PARTS } from './core/lego'
@@ -17,15 +20,45 @@ import { createExample, readImage } from './io/images'
 
 const source = shallowRef<Raster>()
 const fileName = ref('Paisaje de ejemplo')
-const available = ref(9)
+const cubeAvailable = ref(9)
+const legoAvailable = ref(1024)
 const material = ref<'rubik' | LegoPartId>('rubik')
 const isLego = computed(() => material.value !== 'rubik')
+const available = computed({ get: () => isLego.value ? legoAvailable.value : cubeAvailable.value, set: (v) => { if (isLego.value) legoAvailable.value = v; else cubeAvailable.value = v } })
+const sizingMode = ref<'budget' | 'size'>('budget')
+const keepRatio = ref(true)
+const lastAxis = ref<'columns' | 'rows'>('columns')
+const selectedCrop = ref<Crop>()
+const cropEditorOpen = ref(false)
+const bounds = computed(() => source.value ? selectedCrop.value ?? { x: 0, y: 0, width: source.value.width, height: source.value.height } : undefined)
+const targetRatio = computed(() => bounds.value ? bounds.value.width / bounds.value.height : 1)
+const suggestion = computed(() => {
+  try { return { dimensions: suggestLayout(available.value, targetRatio.value, isLego.value ? 22500 : 2500), error: '' } }
+  catch (error) { return { dimensions: undefined, error: (error as Error).message } }
+})
 const cubeColumns = ref(3)
 const cubeRows = ref(3)
 const legoColumns = ref(32)
 const legoRows = ref(32)
-const columns = computed({ get: () => isLego.value ? legoColumns.value : cubeColumns.value, set: (v) => { if (isLego.value) legoColumns.value = v; else cubeColumns.value = v } })
-const rows = computed({ get: () => isLego.value ? legoRows.value : cubeRows.value, set: (v) => { if (isLego.value) legoRows.value = v; else cubeRows.value = v } })
+const manualColumns = computed({ get: () => isLego.value ? legoColumns.value : cubeColumns.value, set: (v) => { if (isLego.value) legoColumns.value = v; else cubeColumns.value = v } })
+const manualRows = computed({ get: () => isLego.value ? legoRows.value : cubeRows.value, set: (v) => { if (isLego.value) legoRows.value = v; else cubeRows.value = v } })
+function syncDimension(axis: 'columns' | 'rows') {
+  const linked = linkedDimension(axis === 'columns' ? manualColumns.value : manualRows.value, targetRatio.value, axis)
+  if (linked !== undefined) { if (axis === 'columns') manualRows.value = linked; else manualColumns.value = linked }
+}
+const columns = computed({ get: () => sizingMode.value === 'budget' ? suggestion.value.dimensions?.columns ?? 0 : manualColumns.value, set: (v) => { manualColumns.value = v; lastAxis.value = 'columns'; if (keepRatio.value) syncDimension('columns') } })
+const rows = computed({ get: () => sizingMode.value === 'budget' ? suggestion.value.dimensions?.rows ?? 0 : manualRows.value, set: (v) => { manualRows.value = v; lastAxis.value = 'rows'; if (keepRatio.value) syncDimension('rows') } })
+function chooseSizing(mode: 'budget' | 'size') {
+  if (mode === sizingMode.value) return
+  if (mode === 'size') {
+    const previous = { columns: columns.value, rows: rows.value }
+    manualColumns.value = previous.columns || 1; manualRows.value = previous.rows || 1
+    lastAxis.value = 'columns'
+  }
+  sizingMode.value = mode
+  if (mode === 'size' && keepRatio.value) syncDimension(lastAxis.value)
+}
+watch([targetRatio, material], () => { if (sizingMode.value === 'size' && keepRatio.value) syncDimension(lastAxis.value) })
 const selections = ref(Object.fromEntries(LEGO_PARTS.map((part) => [part.id, getLegoPalette(part.id).map((color) => color.id)])))
 const legoPalette = computed(() => material.value === 'rubik' ? [] : getLegoPalette(material.value))
 const selectedColors = computed({ get: () => selections.value[material.value] ?? [], set: (ids: string[]) => { selections.value[material.value] = ids } })
@@ -54,7 +87,7 @@ let nextRuleId = 1
 const analysis = computed(() => source.value ? createRegionRaster(source.value) : undefined)
 const draftMask = computed(() => analysis.value && regionPoint.value ? selectRegion(analysis.value, regionPoint.value, tolerance.value) : undefined)
 const selectionMask = computed(() => draftMask.value ?? viewedMask.value)
-watch(source, () => { rules.value = []; regionPoint.value = undefined; viewedMask.value = undefined; selecting.value = false })
+watch(source, () => { selectedCrop.value = undefined; cropEditorOpen.value = false; rules.value = []; regionPoint.value = undefined; viewedMask.value = undefined; selecting.value = false })
 watch(palette, (colors) => { if (!colors.some(color => color.id === regionColor.value)) regionColor.value = colors[0]?.id ?? '' }, { immediate: true })
 function pickRegion(point: Point) {
   if (!source.value) return
@@ -73,11 +106,15 @@ function previewRegion(id: number) { regionPoint.value = undefined; viewedMask.v
 
 
 const layout = computed(() => {
-  try { return { geometry: isLego.value ? getLegoGeometry(columns.value, rows.value) : getGeometry(available.value, columns.value, rows.value), error: '' } }
-  catch (error) { return { geometry: undefined, error: (error as Error).message } }
+  try {
+    if (sizingMode.value === 'budget' && suggestion.value.error) throw new Error(suggestion.value.error)
+    const used = columns.value * rows.value
+    const geometry = isLego.value ? getLegoGeometry(columns.value, rows.value) : getGeometry(sizingMode.value === 'budget' ? available.value : used, columns.value, rows.value)
+    return { geometry: { ...geometry, remaining: sizingMode.value === 'budget' ? available.value - used : 0 }, error: '' }
+  } catch (error) { return { geometry: undefined, error: (error as Error).message } }
 })
-const crop = computed(() => source.value && layout.value.geometry
-  ? getCrop(source.value.width, source.value.height, columns.value / rows.value, zoom.value, horizontal.value / 100, vertical.value / 100)
+const crop = computed(() => bounds.value && layout.value.geometry
+  ? cropWithin(bounds.value, columns.value / rows.value, zoom.value, horizontal.value / 100, vertical.value / 100)
   : undefined)
 const samples = computed(() => {
   const geometry = layout.value.geometry
@@ -122,7 +159,10 @@ async function upload(event: Event) {
     if (request === loadRequest) imageError.value = (error as Error).message
   } finally { if (request === loadRequest) loading.value = false }
 }
-function preset(side: number) { available.value = side * side; columns.value = side; rows.value = side }
+function preset(count: number) { sizingMode.value = 'budget'; available.value = count }
+function applyCrop(rect: Crop) { selectedCrop.value = rect; cropEditorOpen.value = false; resetCrop() }
+function openCrop() { selecting.value = false; cropEditorOpen.value = true }
+function fullImage() { selectedCrop.value = undefined; resetCrop() }
 onMounted(useExample)
 </script>
 
@@ -148,6 +188,7 @@ onMounted(useExample)
             <h2><span class="step">01</span> La imagen</h2>
             <label class="upload-button"><input type="file" accept="image/jpeg,image/png,image/webp" @change="upload" /><span aria-hidden="true">↥</span> {{ loading ? 'Abriendo imagen…' : 'Subir una imagen' }}</label>
             <p class="control-hint">JPG, PNG o WebP · hasta 20 MiB</p>
+            <div v-if="source" class="crop-entry"><button type="button" class="crop-open-button" @click="openCrop">Recortar imagen</button><button v-if="selectedCrop" type="button" class="text-button" @click="fullImage">Usar imagen completa</button><p class="control-hint">Proporción {{ targetRatio.toFixed(3) }}:1 · {{ selectedCrop ? 'Recorte personalizado' : 'Imagen completa' }}</p></div>
             <p v-if="imageError" class="error-message" role="alert">{{ imageError }}</p>
             <button class="text-button" type="button" @click="useExample">Usar el paisaje de ejemplo <span aria-hidden="true">↗</span></button>
           </section>
@@ -155,15 +196,27 @@ onMounted(useExample)
           <section class="control-section">
             <h2><span class="step">02</span> Tus piezas</h2>
             <label class="material-label">Material<select v-model="material"><option value="rubik">Cubos de Rubik 3×3</option><option v-for="part in LEGO_PARTS" :key="part.id" :value="part.id">{{ part.name }}</option></select></label>
-            <div class="number-fields" :class="{ 'lego-dimensions': isLego }">
-              <label v-if="!isLego">Disponibles<input v-model.number="available" type="number" min="1" max="2500" step="1" inputmode="numeric" :aria-invalid="!!layout.error" /></label>
-              <label>Columnas<input v-model.number="columns" type="number" min="1" :max="isLego ? 22500 : 2500" step="1" inputmode="numeric" :aria-invalid="!!layout.error" /></label>
-              <label>Filas<input v-model.number="rows" type="number" min="1" :max="isLego ? 22500 : 2500" step="1" inputmode="numeric" :aria-invalid="!!layout.error" /></label>
+            <div class="segmented sizing-modes" role="group" aria-label="Cómo definir el tamaño"><button type="button" :aria-pressed="sizingMode === 'budget'" :class="{ selected: sizingMode === 'budget' }" @click="chooseSizing('budget')">Tengo estas piezas</button><button type="button" :aria-pressed="sizingMode === 'size'" :class="{ selected: sizingMode === 'size' }" @click="chooseSizing('size')">Quiero este tamaño</button></div>
+            <div v-if="sizingMode === 'budget'" class="number-fields one-field">
+              <label>{{ isLego ? 'Piezas disponibles' : 'Cubos disponibles' }}<input v-model.number="available" type="number" min="1" :max="isLego ? 22500 : 2500" step="1" inputmode="numeric" :aria-invalid="!!layout.error" /></label>
             </div>
+            <template v-else>
+              <label class="checkbox-label ratio-lock"><input v-model="keepRatio" type="checkbox" @change="keepRatio && syncDimension(lastAxis)" /> Mantener proporción del recorte</label>
+              <div class="number-fields lego-dimensions">
+                <label>Columnas<input v-model.number="columns" type="number" min="1" :max="isLego ? 22500 : 2500" step="1" inputmode="numeric" :aria-invalid="!!layout.error" /></label>
+                <label>Filas<input v-model.number="rows" type="number" min="1" :max="isLego ? 22500 : 2500" step="1" inputmode="numeric" :aria-invalid="!!layout.error" /></label>
+              </div>
+            </template>
             <p v-if="isLego" class="control-hint">Una pieza = un píxel. Columnas y filas en piezas.</p>
-            <div v-else class="presets"><span>Probar con</span><button v-for="side in [3, 10, 30]" :key="side" type="button" :class="{ active: available === side * side && columns === side && rows === side }" @click="preset(side)">{{ side * side }}</button><span>cubos</span></div>
+            <p v-else class="control-hint">Columnas y filas en cubos. Cada cubo aporta 3×3 píxeles.</p>
+            <div v-if="sizingMode === 'budget'" class="presets"><span>Probar con</span><button v-for="count in (isLego ? [256, 1024, 4096] : [9, 100, 900])" :key="count" type="button" :class="{ active: available === count }" @click="preset(count)">{{ count }}</button></div>
             <p v-if="layout.error" class="error-message" role="alert">{{ layout.error }}</p>
-            <div v-else-if="layout.geometry" class="resolution-box" aria-live="polite"><div><span>Resolución del mosaico</span><strong>{{ layout.geometry.width }} <small>×</small> {{ layout.geometry.height }} <em>px</em></strong></div><span class="resolution-note">{{ layout.geometry.used }} {{ isLego ? 'piezas' : 'cubos' }}<template v-if="!isLego"> · {{ layout.geometry.remaining }} sobrantes</template></span></div>
+            <div v-else-if="layout.geometry" class="resolution-box" aria-live="polite">
+              <p class="layout-summary"><strong>{{ columns }} × {{ rows }}</strong> {{ isLego ? 'piezas' : 'cubos' }}</p>
+              <div><span>Resolución del mosaico</span><strong>{{ layout.geometry.width }} <small>×</small> {{ layout.geometry.height }} <em>px</em></strong></div>
+              <span class="resolution-note">{{ sizingMode === 'budget' ? 'Usas' : 'Necesitas' }} {{ layout.geometry.used }} {{ isLego ? 'piezas' : 'cubos' }}<template v-if="sizingMode === 'budget'"> · {{ layout.geometry.remaining }} sobrantes</template></span>
+            </div>
+            <p v-if="layout.geometry" class="control-hint">Las filas y columnas son enteras: la proporción puede aproximarse. La vista muestra el encuadre final sin deformar la imagen.</p>
           </section>
 
           <section v-if="isLego" class="control-section lego-controls">
@@ -197,7 +250,7 @@ onMounted(useExample)
           <div v-if="source && crop && mosaic" class="comparison">
             <figure class="preview-card">
               <figcaption><span>Tu punto de partida</span><span class="caption-number">01</span></figcaption>
-              <CropViewport :source="source" :crop="crop" v-model:zoom="zoom" v-model:horizontal="horizontal" v-model:vertical="vertical" :disabled="selecting" @reset="resetCrop">
+              <CropViewport :source="source" :crop="crop" :bounds="bounds" v-model:zoom="zoom" v-model:horizontal="horizontal" v-model:vertical="vertical" :disabled="selecting" @reset="resetCrop">
                 <CropPreview :source="source" :crop="crop" :selecting="selecting" :selection="selectionMask" @select="pickRegion" />
               </CropViewport>
               <p class="image-caption" :title="fileName">{{ fileName }}</p>
@@ -211,6 +264,7 @@ onMounted(useExample)
         </section>
       </div>
     </main>
+    <CropEditor v-if="cropEditorOpen && source && bounds" :source="source" :initial="bounds" @apply="applyCrop" @cancel="cropEditorOpen = false" />
     <footer class="site-footer"><span>Hecho para imaginar con las manos.</span><a href="https://github.com/yurigo/rubik-mosaic" target="_blank" rel="noopener noreferrer">El proyecto en GitHub <span aria-hidden="true">↗</span></a></footer>
   </div>
 </template>

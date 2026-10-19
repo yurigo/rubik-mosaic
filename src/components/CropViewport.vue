@@ -4,7 +4,7 @@ import type { Crop, Raster } from '../core/mosaic'
 import { clamp, containedSize, navigateCrop } from '../core/crop-navigation'
 import type { Point } from '../core/crop-navigation'
 
-const props = defineProps<{ source: Raster; crop: Crop; zoom: number; horizontal: number; vertical: number; disabled?: boolean }>()
+const props = defineProps<{ source: Raster; crop: Crop; bounds?: Crop; zoom: number; horizontal: number; vertical: number; disabled?: boolean }>()
 const emit = defineEmits<{ 'update:zoom': [value: number]; 'update:horizontal': [value: number]; 'update:vertical': [value: number]; reset: [] }>()
 const stage = ref<HTMLElement>()
 const stageSize = ref({ width: 0, height: 0 })
@@ -37,7 +37,7 @@ function rebase() {
   dragging.value = pointers.size > 0
 }
 function update(crop: Crop, zoom: number, from: Point, to = from) {
-  const next = navigateCrop(props.source, crop, zoom, from, to)
+  const next = navigateCrop(props.source, crop, zoom, from, to, props.bounds)
   emit('update:zoom', next.zoom)
   emit('update:horizontal', next.horizontal)
   emit('update:vertical', next.vertical)
@@ -96,7 +96,7 @@ function clearPointers() {
   start = undefined
   dragging.value = false
 }
-watch([() => props.disabled, () => props.source, () => Math.round(ratio.value * 1e8)], clearPointers)
+watch([() => props.disabled, () => props.source, () => props.bounds, () => Math.round(ratio.value * 1e8)], clearPointers)
 onMounted(() => {
   resizeObserver = new ResizeObserver(([entry]) => {
     if (!entry) return
@@ -136,4 +136,5 @@ onBeforeUnmount(() => { resizeObserver?.disconnect(); surface.value?.removeEvent
 .crop-toolbar output { font-size: 11px; min-width: 34px; text-align: center; font-variant-numeric: tabular-nums; }
 .crop-toolbar .crop-reset { font-size: 10px; padding-inline: 10px; border-left: 1px solid #d9ddd2; }
 .crop-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.crop-surface :deep(canvas) { width: 100%; height: 100%; }
 </style>

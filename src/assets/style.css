@@ -117,3 +117,12 @@ select:focus-visible { outline: 3px solid #2469a4; outline-offset: 3px; }
 .consumption li { display: flex; align-items: center; gap: 8px; font-size: 11px; min-height: 32px; }
 .consumption strong { margin-left: auto; font-variant-numeric: tabular-nums; }
 @media (min-width: 481px) and (max-width: 760px) { .lego-controls { grid-column: 1 / -1; } }
+
+.crop-entry { margin-top: 14px; }
+.crop-open-button { display: block; width: 100%; min-height: 44px; padding: 10px; border: 1px solid #bbc6b0; border-radius: 5px; color: #344331; background: #eef1e7; font-size: 12px; margin-bottom: 10px; }
+.sizing-modes { margin-bottom: 16px; }
+.sizing-modes button { min-height: 44px; padding: 7px; }
+.number-fields.one-field { grid-template-columns: 1fr; }
+.ratio-lock { margin: 12px 0; min-height: 36px; font-size: 11px; line-height: 1.5; }
+.layout-summary { margin: 0 0 12px; font-size: 11px; color: #65765b; }
+.layout-summary strong { color: #344331; }
