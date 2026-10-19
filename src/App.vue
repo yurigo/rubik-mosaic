@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, shallowRef } from 'vue'
+import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import RegionControls from './components/RegionControls.vue'
+import { createRegionRaster, projectRegions, selectRegion } from './core/regions'
+import type { Point, RegionMask, RegionRule } from './core/regions'
 import CropPreview from './components/CropPreview.vue'
+import CropViewport from './components/CropViewport.vue'
 import MosaicPreview from './components/MosaicPreview.vue'
 import { countColors, getCrop, getGeometry, getLegoGeometry, PALETTE, quantize, sampleImage } from './core/mosaic'
 import type { Raster } from './core/mosaic'
@@ -40,6 +44,33 @@ const vertical = ref(50)
 const loading = ref(false)
 const imageError = ref('')
 let loadRequest = 0
+const selecting = ref(false)
+const tolerance = ref(15)
+const regionColor = ref('W')
+const regionPoint = ref<Point>()
+const rules = shallowRef<RegionRule[]>([])
+const viewedMask = shallowRef<RegionMask>()
+let nextRuleId = 1
+const analysis = computed(() => source.value ? createRegionRaster(source.value) : undefined)
+const draftMask = computed(() => analysis.value && regionPoint.value ? selectRegion(analysis.value, regionPoint.value, tolerance.value) : undefined)
+const selectionMask = computed(() => draftMask.value ?? viewedMask.value)
+watch(source, () => { rules.value = []; regionPoint.value = undefined; viewedMask.value = undefined; selecting.value = false })
+watch(palette, (colors) => { if (!colors.some(color => color.id === regionColor.value)) regionColor.value = colors[0]?.id ?? '' }, { immediate: true })
+function pickRegion(point: Point) {
+  if (!source.value) return
+  regionPoint.value = { x: Math.min(1 - Number.EPSILON, Math.max(0, point.x / source.value.width)), y: Math.min(1 - Number.EPSILON, Math.max(0, point.y / source.value.height)) }
+  viewedMask.value = undefined
+}
+function cancelRegion() { regionPoint.value = undefined; viewedMask.value = undefined }
+function applyRegion() {
+  if (!draftMask.value || !palette.value.some(color => color.id === regionColor.value) || rules.value.length >= 12) return
+  rules.value = [...rules.value, { id: nextRuleId++, mask: draftMask.value, colorId: regionColor.value, tolerance: tolerance.value }]
+  viewedMask.value = draftMask.value
+  regionPoint.value = undefined
+}
+function removeRegion(id: number) { rules.value = rules.value.filter(rule => rule.id !== id); viewedMask.value = undefined }
+function previewRegion(id: number) { regionPoint.value = undefined; viewedMask.value = rules.value.find(rule => rule.id === id)?.mask }
+
 
 const layout = computed(() => {
   try { return { geometry: isLego.value ? getLegoGeometry(columns.value, rows.value) : getGeometry(available.value, columns.value, rows.value), error: '' } }
@@ -52,9 +83,14 @@ const samples = computed(() => {
   const geometry = layout.value.geometry
   return source.value && crop.value && geometry ? sampleImage(source.value, crop.value, geometry.width, geometry.height) : undefined
 })
+const forcedColors = computed(() => source.value && crop.value && layout.value.geometry ? projectRegions(rules.value, source.value, crop.value, layout.value.geometry.width, layout.value.geometry.height, palette.value) : undefined)
+const draftCellCount = computed(() => {
+  const geometry = layout.value.geometry
+  return draftMask.value && source.value && crop.value && geometry && regionColor.value ? projectRegions([{ id: 0, mask: draftMask.value, colorId: regionColor.value, tolerance: tolerance.value }], source.value, crop.value, geometry.width, geometry.height, palette.value).filter(Boolean).length : 0
+})
 const mosaic = computed(() => {
   const geometry = layout.value.geometry
-  return samples.value && geometry && !paletteError.value ? quantize(samples.value, geometry.width, geometry.height, dither.value ? strength.value / 100 : 0, palette.value, colorMethod.value) : undefined
+  return samples.value && geometry && !paletteError.value ? quantize(samples.value, geometry.width, geometry.height, dither.value ? strength.value / 100 : 0, palette.value, colorMethod.value, forcedColors.value) : undefined
 })
 
 const consumption = computed(() => mosaic.value ? countColors(mosaic.value) : {})
@@ -141,9 +177,7 @@ onMounted(useExample)
 
           <section class="control-section">
             <h2><span class="step">03</span> Encuadra a tu gusto</h2>
-            <label class="range-label" for="zoom">Ampliación <output>{{ zoom.toFixed(1) }}×</output><input id="zoom" v-model.number="zoom" type="range" min="1" max="4" step="0.1" /></label>
-            <label class="range-label">Posición horizontal<input v-model.number="horizontal" type="range" min="0" max="100" /></label>
-            <label class="range-label">Posición vertical<input v-model.number="vertical" type="range" min="0" max="100" /></label>
+            <p class="control-hint">En modo Encuadrar, mueve la imagen arrastrando. Amplía con dos dedos, la rueda o los botones + y − sobre la imagen. Con el encuadre enfocado también puedes usar +, − y las flechas del teclado.</p>
             <button class="text-button subtle" type="button" @click="resetCrop">Restablecer encuadre</button>
           </section>
 
@@ -159,8 +193,15 @@ onMounted(useExample)
 
         <section class="preview-area" aria-label="Vista previa" :aria-busy="loading">
           <div class="preview-toolbar"><div><span class="status-dot" /><span>{{ loading ? 'Abriendo tu imagen' : 'Vista previa' }}</span></div><label class="checkbox-label"><input v-model="grid" type="checkbox" /> {{ isLego ? 'Ver límites de piezas' : 'Ver cubos 3×3' }}</label></div>
+          <RegionControls v-if="source" v-model:selecting="selecting" v-model:tolerance="tolerance" v-model:color-id="regionColor" :palette="palette" :rules="rules" :has-selection="!!draftMask" :cell-count="draftCellCount" @apply="applyRegion" @cancel="cancelRegion" @remove="removeRegion" @preview="previewRegion" />
           <div v-if="source && crop && mosaic" class="comparison">
-            <figure class="preview-card"><figcaption><span>Tu punto de partida</span><span class="caption-number">01</span></figcaption><div class="canvas-stage"><CropPreview :source="source" :crop="crop" /></div><p class="image-caption" :title="fileName">{{ fileName }}</p></figure>
+            <figure class="preview-card">
+              <figcaption><span>Tu punto de partida</span><span class="caption-number">01</span></figcaption>
+              <CropViewport :source="source" :crop="crop" v-model:zoom="zoom" v-model:horizontal="horizontal" v-model:vertical="vertical" :disabled="selecting" @reset="resetCrop">
+                <CropPreview :source="source" :crop="crop" :selecting="selecting" :selection="selectionMask" @select="pickRegion" />
+              </CropViewport>
+              <p class="image-caption" :title="fileName">{{ fileName }}</p>
+            </figure>
             <figure class="preview-card result-card"><figcaption><span>Tu mosaico</span><span class="caption-number">02</span></figcaption><div class="canvas-stage"><MosaicPreview :mosaic="mosaic" :grid="grid" :palette="palette" :group-size="isLego ? 1 : 3" :shape="shape" :base-color="baseColor" /></div><p class="image-caption">{{ mosaic.width }} × {{ mosaic.height }} casillas · {{ palette.length }} colores disponibles</p></figure>
           </div>
           <div v-else class="preview-empty" role="status"><span aria-hidden="true">▦</span><h2>Un espacio para tu mosaico</h2><p>{{ paletteError || layout.error || 'Sube una imagen o prueba nuestro paisaje.' }}</p></div>
