@@ -1,0 +1,56 @@
+bricklink_id,bricklink_name,ldraw_code,ldraw_name,rgb,previous_css_rgb
+11,Black,0,Black,1B2A34,2E2E2E
+7,Blue,1,Blue,1E5AA8,196BCF
+174,Blue Violet,431,Bright_Blue_Violet,665EA7,8A7FDD
+36,Bright Green,10,Bright_Green,58AB41,2BD043
+105,Bright Light Blue,212,Bright_Light_Blue,9DC3F7,B5D6FF
+110,Bright Light Orange,191,Bright_Light_Orange,FCAC00,FDBF0E
+103,Bright Light Yellow,226,Bright_Light_Yellow,FFEC6C,FCEB82
+104,Bright Pink,29,Bright_Pink,FF9ECD,FCB1DB
+8,Brown,6,Brown,543324,70462E
+220,Coral,353,Coral,FF6D77,FF765C
+153,Dark Azure,321,Dark_Azure,469BC3,38AEEB
+63,Dark Blue,272,Dark_Blue,19325A,234065
+85,Dark Bluish Gray,72,Dark_Bluish_Grey,646464,7D7C78
+120,Dark Brown,308,Dark_Brown,352100,50372F
+10,Dark Gray,8,Dark_Grey,545955,848375
+80,Dark Green,288,Dark_Green,00451A,30533B
+68,Dark Orange,484,Dark_Orange,91501C,AC5112
+47,Dark Pink,5,Dark_Pink,D3359D,EF5BB3
+89,Dark Purple,85,Medium_Lilac,441A91,7045BA
+59,Dark Red,320,Dark_Red,720012,83211F
+69,Dark Tan,28,Dark_Tan,897D62,A98F6A
+39,Dark Turquoise,3,Dark_Turquoise,069D9F,0BABA8
+6,Green,2,Green,00852B,009D48
+154,Lavender,31,Lavender,CDA4DE,D0B8ED
+152,Light Aqua,323,Light_Aqua,D3F2EA,C0F4E7
+86,Light Bluish Gray,71,Light_Bluish_Grey,969696,B9B9B9
+9,Light Gray,7,Light_Grey,8A928D,B8BAAE
+90,Light Nougat,78,Light_Nougat,FFC995,F7CFB4
+34,Lime,27,Lime,A5CA18,BEE13C
+72,Maersk Blue,313,Maersk_Blue,ABD9FF,6BC4E1
+71,Magenta,26,Magenta,901F76,BA177E
+156,Medium Azure,322,Medium_Azure,68C3E2,70DCF3
+42,Medium Blue,73,Medium_Blue,7396C8,81B0E4
+157,Medium Lavender,30,Medium_Lavender,A06EB9,C38BD4
+150,Medium Nougat,84,Medium_Nougat,AA7D55,D59459
+31,Medium Orange,462,Medium_Orange,F58624,FFAC00
+241,Medium Tan,371,Medium_Tan,CCA373,FBC685
+236,Neon Yellow,368,Neon_Yellow,EDFF21,F3F304
+28,Nougat,92,Nougat,BB805A,F1A56B
+155,Olive Green,330,Olive_Green,77774E,A9A45A
+4,Orange,25,Orange,D67923,FF8D34
+23,Pink,13,Pink,F6A9BB,FBD0DE
+24,Purple,22,Purple,671F81,8622A1
+5,Red,4,Red,B40000,D82424
+88,Reddish Brown,70,Reddish_Brown,5F3109,7C442C
+167,Reddish Orange,402,Reddish_Orange,CA4C0B,FF5500
+56,Rose Pink,10017,Rose_Pink,FF9494,F2D3D1
+55,Sand Blue,379,Sand_Blue,70819A,93ABB9
+48,Sand Green,378,Sand_Green,708E7C,98B69C
+2,Tan,19,Tan,D7BA8C,E1D19D
+49,Very Light Gray,503,Very_Light_Grey,BCB4A5,D8D9CE
+175,Warm Pink,430,Warm_Pink,F79B9B,FFBAB7
+1,White,15,White,F4F4F4,F3F4EF
+3,Yellow,14,Yellow,FAC80A,FFDA19
+158,Yellowish Green,326,Yellowish_Green,E2F99A,DBED94
